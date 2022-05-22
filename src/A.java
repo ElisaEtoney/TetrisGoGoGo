@@ -13,8 +13,10 @@ public class A extends JFrame implements KeyListener {
     private static final int game_y = 12;
     JTextArea[][] text;
     int[][] table;
-    JLabel label1,label2;
-    JLabel hint1,hint2,hint3;
+    JLabel label1,label2,label3;
+    JTextField scoreField,gameField;
+    JLabel hint1,hint2,hint3,hint4;
+//    JButton
 
     int score = 0;
     int time;
@@ -66,7 +68,6 @@ public class A extends JFrame implements KeyListener {
                     text[i][j].setBackground(Color.BLACK);
                     table[i][j] = 1;
                 }
-
                 text[i][j].setEditable(false);
                 gameMain.add(text[i][j]);
             }
@@ -78,34 +79,41 @@ public class A extends JFrame implements KeyListener {
     //5
     public void initExplainPanel() {
         JPanel explain_le = new JPanel();
-        JPanel explain_Ri = new JPanel();
-
-        explain_le.setLayout(new GridLayout(8, 1));
-        explain_Ri.setLayout(new GridLayout(2, 1));
-
-        label1 = new JLabel("Good boy go~");
+        explain_le.setLayout(new GridLayout(12, 1));
+        explain_le.setBackground(Color.white);
+        label1 = new JLabel("[游戏状态]",JLabel.CENTER);
         label1.setFont(font3);
-        label2 = new JLabel("Score: " + score);
-        label2.setSize(200,50);
-        label2.setFont(font3);
 
-        hint1 = new JLabel("(←)向左移动  (→)向右移动",JLabel.CENTER);
-        hint2 = new JLabel("(↓)加速下落",JLabel.CENTER);
-        hint3 = new JLabel("(Space)旋转方块",JLabel.CENTER);
-        hint1.setFont(font3);hint1.setForeground(Color.BLUE);
-        hint2.setFont(font3);hint2.setForeground(Color.BLUE);
-        hint3.setFont(font3);hint3.setForeground(Color.BLUE);
+        gameField = new JTextField("游戏中!!!");
+        gameField.setForeground(Color.blue);
+        gameField.setEditable(false);
+        gameField.setFont(font3);
 
+        label3 = new JLabel("Your Score:",JLabel.LEFT);
+        label3.setFont(font2);
 
-        explain_le.add(new JLabel("(←) 向左移动  (→) 向右移动",SwingConstants.CENTER),CENTER_ALIGNMENT);
-        explain_le.add(new JLabel("(↓) 向下移动",SwingConstants.CENTER),CENTER_ALIGNMENT);
-        explain_le.add(new JLabel("(Space) 旋转方块",SwingConstants.CENTER),CENTER_ALIGNMENT);
+        scoreField = new JTextField(score + "");
+        scoreField.setFont(font2);
+        scoreField.setEditable(false);
 
-        explain_Ri.add(label1);
-        explain_Ri.add(label2);
+        hint1 = new JLabel("(←)向左移动",JLabel.CENTER);hint1.setFont(font3);hint1.setForeground(Color.BLUE);
+        hint2 = new JLabel("(→)向右移动",JLabel.CENTER);hint2.setFont(font3);hint2.setForeground(Color.BLUE);
+        hint3 = new JLabel("(↓)加速下落",JLabel.CENTER);hint3.setFont(font3);hint3.setForeground(Color.BLUE);
+        hint4 = new JLabel(" (Space)旋转方块 ",JLabel.CENTER);hint4.setFont(font3);hint4.setForeground(Color.BLUE);
+
+        explain_le.add(hint1);
+        explain_le.add(hint2);
+        explain_le.add(hint3);
+        explain_le.add(hint4);
+        for (int i = 0; i < 1; i++) {
+            explain_le.add(new JLabel());
+        }
+        explain_le.add(label1);
+        explain_le.add(gameField);
+        explain_le.add(label3);
+        explain_le.add(scoreField);
 
         this.add(explain_le, BorderLayout.EAST);
-        this.add(explain_Ri, BorderLayout.NORTH);
     }
 
     public A() {
@@ -122,13 +130,10 @@ public class A extends JFrame implements KeyListener {
         tetris1.gameRun();
     }
 
-
     //gameRun包含成就6
     public void gameRun() throws InterruptedException {
         initialize();
-        keyListener();
         System.out.println("Go!");
-
         //游戏开始，结束时退出循环
         while (true) {
             //方块产生并运动 触底即退出运动循环
@@ -234,7 +239,6 @@ public class A extends JFrame implements KeyListener {
         this.addKeyListener(listener);
         this.requestFocus();
     }
-
     //这个方法虽然现在不用，但先不要删除代码
     public boolean gotRightRect() {
         for (int j = 0; j < table.length; j++) {
@@ -339,7 +343,6 @@ public class A extends JFrame implements KeyListener {
     //可通过判别achievement内数据进行处理
     public void scoreProcess() {
         //当前score处理，加分
-
         if (lineCounter == 1) score += 40;
         if (lineCounter == 2) score += 100;
         if (lineCounter == 3) score += 500;
@@ -364,7 +367,7 @@ public class A extends JFrame implements KeyListener {
             achievement[4] = 1;
             //成就提醒
         }
-        //label2.setText("Score:" + score);
+        scoreField.setText(score + "");
     }
     public void tableProcess() {
         for (int i = 0; i < table.length - 1; i++) {
