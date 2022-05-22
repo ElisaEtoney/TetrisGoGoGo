@@ -146,7 +146,7 @@ public class A extends JFrame implements KeyListener {
                     fall();
                     //时间间隔
                     Repaint();
-                    Thread.sleep(70);
+                    Thread.sleep(700);
                     //自动下移
                 } else break;
             }
@@ -223,6 +223,7 @@ public class A extends JFrame implements KeyListener {
         this.requestFocus();
     }
 
+    //这个方法虽然现在不用，但先不要删除代码
     public boolean gotRightRect() {
         for (int j = 0; j < table.length; j++) {
             for (int k = 0; k < table[0].length; k++) {
