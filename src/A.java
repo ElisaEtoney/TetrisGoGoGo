@@ -128,8 +128,7 @@ public class A extends JFrame implements KeyListener {
                 for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     if (shape[i][j] == 1) {
-                        shape[i][j] = color;//将初始色改为color编号；
-                        table[i][j + 4] = color;
+                        table[i][j + 4] = color;//将初始色改为color编号；
                     }                      //以上完成方块种类以及颜色的随机生成
                 }
             }
@@ -143,11 +142,11 @@ public class A extends JFrame implements KeyListener {
 
             Repaint();
             while (true) {//方块移动 触底时退出
-                if (!atTheEnd()) {
+                if (!atTheEnd() ) {
                     fall();
                     //时间间隔
                     Repaint();
-                    Thread.sleep(500);
+                    Thread.sleep(70);
                     //自动下移
                 } else break;
             }
@@ -167,7 +166,7 @@ public class A extends JFrame implements KeyListener {
             tableProcess();//将colorNum + 4，改为对应颜色值 (2、3、4、5 对应 6、7、8、9）
             if (GameOver()) break;
         }
-        System.out.println("over");
+        System.out.println("\nover");
         label1 = new JLabel("Good boy go~");
         if (rectNumber <= 6 && achievement[5] == 0) {
             achievement[5] = 1;
@@ -224,7 +223,7 @@ public class A extends JFrame implements KeyListener {
         this.requestFocus();
     }
 
-    public boolean fault() {
+    public boolean gotRightRect() {
         for (int j = 0; j < table.length; j++) {
             for (int k = 0; k < table[0].length; k++) {
                 if (table[j][k] == color) return true;
