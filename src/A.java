@@ -398,34 +398,7 @@ public class A extends JFrame implements KeyListener {
     }
 
     public boolean canRotate(int m , int n) {
-        //从左下角到右上角，内循环为j 得出（3,0）的相对位置
-        if (rectType < 4) {
-            if (typeNumber == 1) m++;
-            else if (typeNumber == 2){
-                n--;
-            }else{
-                n-=2;
-            }
-        } else if (rectType < 8) {
-            if (typeNumber == 0 ||typeNumber == 2) n--;
-            if (typeNumber == 3) m++;
-         else if (rectType < 12) {
-            if (typeNumber == 0) m++;
-            else n--;
-        } else if (rectType < 14) {
-                if (typeNumber == 0) n--;
-                else m--;
-            }
-        } else if (rectType < 16) {
-            if (typeNumber == 0) n = n - 1;
-            else{
-                m++;
-                n--;
-            }
-        } else if (rectType < 18) {
-            if (typeNumber == 0) n--;
-            if (typeNumber == 1) m++;
-        }
+        if(typeNumber == 18) return false;
         //获取对应方块
         if (rectType < 12){
             typeNumber = (typeNumber + 1) % 4;
@@ -438,7 +411,6 @@ public class A extends JFrame implements KeyListener {
             else if(rectType < 16) temporaryRect = z2.get(typeNumber);
             else temporaryRect = bar.get(typeNumber);
         } else temporaryRect = squ.get(0);
-
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if(temporaryRect[i][j] != 0){
@@ -451,6 +423,7 @@ public class A extends JFrame implements KeyListener {
         }
         return true;
     }
+
     public void rotate() {
         int m, n;
         m = 0;
@@ -465,6 +438,35 @@ public class A extends JFrame implements KeyListener {
                 }
             }
         }
+        //从左下角到右上角，内循环为j 得出（3,0）的相对位置
+        if (rectType < 4) {
+            if (typeNumber == 1) m++;
+            else if (typeNumber == 2){
+                n--;
+            }else{
+                n-=2;
+            }
+        } else if (rectType < 8) {
+            if (typeNumber == 0 ||typeNumber == 2) n--;
+            if (typeNumber == 3) m++;
+            else if (rectType < 12) {
+                if (typeNumber == 0) m++;
+                else n--;
+            } else if (rectType < 14) {
+                if (typeNumber == 0) n--;
+                else m--;
+            }
+        } else if (rectType < 16) {
+            if (typeNumber == 0) n = n - 1;
+            else{
+                m++;
+                n--;
+            }
+        } else if (rectType < 18) {
+            if (typeNumber == 0) n--;
+            if (typeNumber == 1) m++;
+        }
+
 
         //扫除原有方块并将新方块绘制到table上
         if(canRotate(m,n)){
@@ -480,9 +482,9 @@ public class A extends JFrame implements KeyListener {
                     if(temporaryRect[i][j] != 0) table[m-3+i][j+n] = color;
                 }
             }
+            Repaint();
         }
-        Repaint();
-        if(canRotate(m,n)) {
+        else {
             //还原被更改的typeNumber
             if(rectType == 18) typeNumber = 0;
             else if(rectType >= 12 && rectType < 18)typeNumber =  (typeNumber-1)%2;
@@ -718,7 +720,7 @@ public class A extends JFrame implements KeyListener {
         i2[2][0] = 1;
         i2[2][1] = 1;
         i2[2][2] = 1;
-        i2[3][2] = 1;
+        i2[2][3] = 1;
         bar.add(i2);
     }
     public void squ() {
