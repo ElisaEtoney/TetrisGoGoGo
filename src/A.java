@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class A extends JFrame implements KeyListener {
-    private static final int game_x = 22;
+    private static final int game_x = 21;
     private static final int game_y = 12;
     JTextArea[][] text;
     int[][] table;
@@ -286,7 +286,8 @@ public class A extends JFrame implements KeyListener {
     public void record() {
         int count;
         lineCounter=0;
-        for (int i = table.length - 2; i >= 4; i--) {//从下至上，记录满足条件的整行方块
+        for (int i = table.length - 2; i >= 4; i--) {
+            //从下至上，记录满足条件的整行方块
             //对单行方块  计数
             count = 0;//初始化count值，对单行方块计数
             for (int j = 1; j < table[0].length - 1; j++) {//检查每一行
@@ -302,9 +303,11 @@ public class A extends JFrame implements KeyListener {
 
     //含有Repaint()
     public void erasure() throws InterruptedException {//暂不改 可以简化
-        for (int i : completeLine) {
-            if (i != 0) {
-                for (int j = 1; j < table[i].length - 1; j++) table[i][j] = 0;
+        for (int i = 0; i < table.length-1; i++) {
+            if(completeLine[i] == 1){
+                for (int j = 1; j < table[0].length-1; j++) {
+                        table[i][j] = 0;
+                }
             }
         }
         Repaint();
@@ -313,17 +316,20 @@ public class A extends JFrame implements KeyListener {
 
     //已优化，保证没有残影   含有Repaint()、时停sleep
     public void moveDown() throws InterruptedException {
-        lineCounter = 0;
-        for (int i : completeLine) lineCounter += i;
+        System.out.printf("move down !~~" + lineCounter + " ]]");
+//        lineCounter = 0;
+//        for (int i : completeLine) lineCounter += i;
+
         while (lineCounter > 0) {//移动，一次一行
             int k;
             for (k = 19; k > 3; k--) {//前四行不进行判断
-                if (completeLine[k] != 0) {
+                if (completeLine[k] == 1) {
                     //此处改为0，标记已处理
                     completeLine[k] = 0;
                     break;
                 }
             }
+
             for (int i = k; i >= 3; i--) {
                 for (int j = 1; j < table[0].length - 1; j++) {
                     //同时将table数据和completeLine下移 同步两个数据
@@ -331,11 +337,11 @@ public class A extends JFrame implements KeyListener {
                     completeLine[i] = completeLine[i - 1];
                 }
             }
-            for (int j = 1; j < table[0].length - 1; j++) {
-                //清除首行，保证没有方块余留
-                table[0][j] = 0;
-                completeLine[0] = 0;
-            }
+//            for (int j = 1; j < table[0].length - 1; j++) {
+//                //清除首行，保证没有方块余留
+//                table[0][j] = 0;
+//                completeLine[0] = 0;
+//            }
             lineCounter--;
         }
         Repaint();
@@ -384,10 +390,10 @@ public class A extends JFrame implements KeyListener {
         public void Repaint(){
         for (int i = 0; i < table.length-1; i++){
             for (int j = 1; j < table[i].length-1; j++){
-                if(table[i][j] == 2 || table[i][j] == 6) text[i][j].setBackground(Color.RED);
-                else if(table[i][j] == 3 || table[i][j] == 7) text[i][j].setBackground(Color.BLUE);
-                else if(table[i][j] == 4 || table[i][j] == 8) text[i][j].setBackground(Color.GREEN);
-                else if(table[i][j] == 5 || table[i][j] == 9) text[i][j].setBackground(Color.YELLOW);
+                if(table[i][j] == 2 || table[i][j] == 6) text[i][j].setBackground(new Color(177,114,226));
+                else if(table[i][j] == 3 || table[i][j] == 7) text[i][j].setBackground(new Color(000,204,177));
+                else if(table[i][j] == 4 || table[i][j] == 8) text[i][j].setBackground(new Color(107,155,210));
+                else if(table[i][j] == 5 || table[i][j] == 9) text[i][j].setBackground(new Color(248,210,227));
                 else if(table[i][j] == 0) text[i][j].setBackground(Color.WHITE);
             }
         }
