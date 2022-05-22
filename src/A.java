@@ -141,13 +141,13 @@ public class A extends JFrame implements KeyListener {
             public void keyPressed(KeyEvent event) {
                 int code = event.getKeyCode();
                 switch (code) {
-                    case KeyEvent.VK_S:
+                    case KeyEvent.VK_DOWN:
                         goDown();
                         break;
-                    case KeyEvent.VK_A:
+                    case KeyEvent.VK_LEFT:
                         goLeft();
                         break;
-                    case KeyEvent.VK_D:
+                    case KeyEvent.VK_RIGHT:
                         goRight();
                         break;
                     case KeyEvent.VK_SPACE://旋转方块，未完成
@@ -306,8 +306,8 @@ public class A extends JFrame implements KeyListener {
                     break;
                 }
             }
-            for (int i = k; i >= 0; i--) {
-                for (int j = 1; j < table[i].length - 1; j++) {
+            for (int i = k; i >= 3; i--) {
+                for (int j = 1; j < table[0].length - 1; j++) {
                     //同时将table数据和completeLine下移 同步两个数据
                     table[i][j] = table[i - 1][j];
                     completeLine[i] = completeLine[i - 1];
@@ -397,11 +397,7 @@ public class A extends JFrame implements KeyListener {
                 else if(table[i][j] == 3 || table[i][j] == 7) text[i][j].setBackground(Color.BLUE);
                 else if(table[i][j] == 4 || table[i][j] == 8) text[i][j].setBackground(Color.GREEN);
                 else if(table[i][j] == 5 || table[i][j] == 9) text[i][j].setBackground(Color.YELLOW);
-                else {table[i][j] = 0;
-                    text[i][j].setBackground(Color.WHITE);
-                }
-
-
+                else if(table[i][j] == 0) text[i][j].setBackground(Color.WHITE);
             }
         }
     }
@@ -433,7 +429,6 @@ public class A extends JFrame implements KeyListener {
         }
         return isOver;
     }
-
 
     public void ll() {
         int[][] ll1 = new int[4][4];
