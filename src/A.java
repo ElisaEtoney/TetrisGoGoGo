@@ -240,7 +240,7 @@ public class A extends JFrame implements KeyListener {
                 Thread.sleep(500);
                 //自动下移
             } else break;
-
+//ghhjk
 
         }
     }
