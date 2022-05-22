@@ -711,7 +711,6 @@ public class A extends JFrame implements KeyListener {
         }
         return true;
     }
-
     public void goLeft() {
         if (canGoLeft()) {
             for (int i = table.length - 2; i >= 0; i--) {//左移 j-1
@@ -761,8 +760,9 @@ public class A extends JFrame implements KeyListener {
     }
 
     public void goDown() {
-
-
+        if(!atTheEnd()) fall();
+        System.out.printf("goDown~");
+        repaint();
     }
 
     //public void
