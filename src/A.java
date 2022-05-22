@@ -232,8 +232,6 @@ public class A extends JFrame implements KeyListener {
         Thread.sleep(90);
 
 
-
-
         while (true) {//方块移动 触底时退出
             if (!atTheEnd() && fault()) {
                 fall();
@@ -709,7 +707,6 @@ public class A extends JFrame implements KeyListener {
                     }
                     break;
                 }
-
             }
         }
         return true;
@@ -732,22 +729,24 @@ public class A extends JFrame implements KeyListener {
         Repaint();
     }
 
-    public void goRight() {
-        boolean canGoRight = true;
+    public boolean canGoRight(){
         for (int i = table.length - 2; i >= 0; i--) {
             for (int j = table[0].length - 2; j > 0; j--) {
-                if (table[i][j] == color && j == table[0].length - 2) {
-                    canGoRight = false;//撞墙
-                    break;
-                }
-                if (table[i][j] == color && j < table[0].length - 2 && table[i][j + 1] != 0) {
-                    canGoRight = false;//撞方块
+                if(table[i][j] == color) {
+                    if (table[i][j] == color && j == table[0].length - 2) {
+                        return false;//撞墙
+                    }
+                    if (table[i][j] == color && j < table[0].length - 2 && table[i][j + 1] != 0) {
+                       return false;//撞方块
+                    }
                     break;
                 }
             }
         }
-
-        if (canGoRight) {
+        return true;
+    }
+    public void goRight() {
+        if (canGoRight()) {
             for (int i = table.length - 2; i >= 0; i--) {//右移 j+1
                 for (int j = table[0].length - 2; j > 0; j--) {
                     if (table[i][j] == color) {
