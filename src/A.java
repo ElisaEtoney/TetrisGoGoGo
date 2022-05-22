@@ -281,8 +281,6 @@ public class A extends JFrame implements KeyListener {
         }
         return isOver;
     }
-
-
     public void record() {
         int count;
         lineCounter=0;
