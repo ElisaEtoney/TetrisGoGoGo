@@ -1,6 +1,3 @@
-import sun.awt.windows.ThemeReader;
-import sun.security.mscapi.CPublicKey;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -24,8 +21,6 @@ public class A extends JFrame implements KeyListener {
     int lineCounter;
     Random rand = new Random();
     int color;
-    //暂留int[][] shape
-    int[][] shape;
     //成就
     int[] achievement;
     int rectNumber = 0;//已获得方块数量
@@ -36,7 +31,7 @@ public class A extends JFrame implements KeyListener {
     ArrayList<int[][]> t = new ArrayList<>();
     ArrayList<int[][]> z1 = new ArrayList<>();
     ArrayList<int[][]> z2 = new ArrayList<>();
-    ArrayList<int[][]> i = new ArrayList<>();
+    ArrayList<int[][]> bar = new ArrayList<>();
     ArrayList<int[][]> squ = new ArrayList<>();
     ArrayList<int[][]> help = new ArrayList<>();
 
@@ -115,6 +110,72 @@ public class A extends JFrame implements KeyListener {
 
     //gameRun包含成就6
     public void gameRun() throws InterruptedException {
+        initialize();
+        keyListener();
+        System.out.println("Go!");
+
+        //游戏开始，结束时退出循环
+        while (true) {
+            //方块产生并运动 触底即退出运动循环
+            color = 0;
+            color = rand.nextInt(4) + 2;
+            rectType = 0;
+            typeNumber = 0;
+            rectType = rand.nextInt(19);
+            int[][] shape = getRect();//获取随机的一个方块
+                System.out.print(color + " " + rectType + " " + typeNumber + "   ");
+
+                for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (shape[i][j] == 1) {
+                        shape[i][j] = color;//将初始色改为color编号；
+                        table[i][j + 4] = color;
+                    }                      //以上完成方块种类以及颜色的随机生成
+                }
+            }
+                for (int[] i : shape) {
+                for (int j : i) {
+                    System.out.printf(j + " ");
+                }
+            }
+                System.out.printf("\n");
+
+
+            Repaint();
+            while (true) {//方块移动 触底时退出
+                if (!atTheEnd()) {
+                    fall();
+                    //时间间隔
+                    Repaint();
+                    Thread.sleep(500);
+                    //自动下移
+                } else break;
+            }
+            //已获得方块计数
+            rectNumber++;
+            //触底后，状态判断
+            //record记录游戏区域状态 记录lineCounter
+            record();
+            System.out.println("recorded");
+            //分数处理
+            scoreProcess();
+            label2 = new JLabel("Score: " + score);
+            //消除满足条件的行 内含Repaint() 已加入时停
+            erasure();
+            //下移 内含Repaint() 已加入时停
+            moveDown();
+            tableProcess();//将colorNum + 4，改为对应颜色值 (2、3、4、5 对应 6、7、8、9）
+            if (GameOver()) break;
+        }
+        System.out.println("over");
+        label1 = new JLabel("Good boy go~");
+        if (rectNumber <= 6 && achievement[5] == 0) {
+            achievement[5] = 1;
+            //成就提醒
+        }
+    }
+
+    public void initialize(){
         ll();
         rl();
         t();
@@ -125,18 +186,18 @@ public class A extends JFrame implements KeyListener {
         time = 10;
         completeLine = new int[table.length];
         score = 0;//分数
-        shape = new int[4][4];//方块
         //成就数据
         achievement = new int[7];
         rectNumber = 0;
-
-        System.out.println("Go!");
         for (int i = 0; i < table.length - 1; i++) {
             for (int j = 1; j < table[i].length - 1; j++) {
                 table[i][j] = 0;
             }
         }
+    }
+    //含有Repaint()
 
+    public void keyListener() throws InterruptedException {
         KeyListener listener = new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent event) {
@@ -161,79 +222,6 @@ public class A extends JFrame implements KeyListener {
         };
         this.addKeyListener(listener);
         this.requestFocus();
-        //游戏开始，结束时退出循环
-        while (true) {
-            //方块产生并运动 触底即退出运动循环
-            color = 0;
-            color = rand.nextInt(4) + 2;
-            rectType = 0;
-            typeNumber = 0;
-            rectType = rand.nextInt(19);
-            for (int j = 0; j < 4; j++) {
-                for (int k = 0; k < 4; k++) {
-                    shape[j][k] = 0;
-                }
-            }
-            getRect();//根据rand1和rand2 对shape赋值
-            System.out.print(color + " " + rectType + " " + typeNumber + "   ");
-
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    if (shape[i][j] == 1) {
-                        shape[i][j] = color;//将初始色改为color编号；
-                        table[i][j + 4] = color;
-                    }                      //以上完成方块种类以及颜色的随机生成
-                }
-            }
-            for (int[] i : shape) {
-                for (int j : i) {
-                    System.out.printf(j + " ");
-                }
-            }
-            System.out.printf("\n");
-            Repaint();
-            //Thread.sleep(90);
-
-            while (true) {//方块移动 触底时退出
-                if (!atTheEnd() && fault()) {
-                    fall();
-                    //时间间隔
-                    Repaint();
-                    Thread.sleep(500);
-                    //自动下移
-                } else break;
-            }
-            //已获得方块计数
-            rectNumber++;
-            //System.out.println("2");
-
-            //触底后，状态判断
-            //record记录游戏区域状态 记录lineCounter
-            record();
-            System.out.println("recorded");
-            //分数处理
-            scoreProcess();
-            label2 = new JLabel("Score: " + score);
-            System.out.println("scoreProcessed");
-            //消除满足条件的行 内含Repaint() 已加入时停
-            erasure();
-            //下移 内含Repaint() 已加入时停
-            moveDown();
-            tableProcess();//将colorNum + 4，改为对应颜色值 (2、3、4、5 对应 6、7、8、9）
-            if (GameOver()) break;
-        }
-        System.out.println("over");
-        label1 = new JLabel("Good boy go~");
-        if (rectNumber <= 6 && achievement[5] == 0) {
-            achievement[5] = 1;
-            //成就提醒
-        }
-    }
-
-
-    //含有Repaint()
-    public void rectRun() throws InterruptedException {
-
     }
 
     public boolean fault() {
@@ -244,17 +232,38 @@ public class A extends JFrame implements KeyListener {
         }
         return false;
     }
-
-    public void fall() {
-        for (int i = table.length - 2; i >= 0; i--) {//从下往上
-            for (int j = 1; j < table[0].length - 1; j++) {
-                if (table[i][j] == color && i + 1 < table.length - 1) {
-                    table[i + 1][j] = table[i][j];
-                    table[i][j] = 0;
+    public boolean atTheEnd() {
+        boolean stop = false;
+        //初始化记录值
+        for (int k = 1; k < table[0].length - 1; k++) {
+            if (table[table.length - 2][k] == color) {
+                stop = true;//此时方块已到底
+                break;
+            }
+        }
+        if (!stop) {
+            for (int j = 1; j < table[0].length - 1; j++) {//列号
+                for (int i = table.length - 3; i >= 0; i--) {//行号
+                    if (table[i][j] == color && table[i + 1][j] != 0 && table[i + 1][j] != color) {
+                        stop = true;
+                        break;
+                    }
                 }
             }
         }
+        return stop;
     }
+    public boolean GameOver() {
+        boolean isOver = false;
+        for (int j = 1; j < table[3].length - 1; j++) {
+            if (table[3][j] != 0) {
+                isOver = true;
+                break;
+            }
+        }
+        return isOver;
+    }
+
 
     public void record() {
         int count;
@@ -271,7 +280,6 @@ public class A extends JFrame implements KeyListener {
             }
         }
     }
-
     //含有Repaint()
     public void erasure() throws InterruptedException {//暂不改 可以简化
         for (int i : completeLine) {
@@ -283,8 +291,7 @@ public class A extends JFrame implements KeyListener {
         Repaint();
         Thread.sleep(time);
     }
-
-    //已优化，保证没有残影   含有Repaint()、时停sleep
+    //含有Repaint()
     public void moveDown() throws InterruptedException {
         lineCounter = 0;
         for (int i : completeLine) lineCounter += i;
@@ -311,35 +318,9 @@ public class A extends JFrame implements KeyListener {
             }
             lineCounter--;
         }
-        //Repaint
-        Thread.sleep(time);
         Repaint();
+        Thread.sleep(time);
     }
-
-    //5.21 12:00 有修改
-    //atTheEnd 待修改  等待确认方块产生机制
-    public boolean atTheEnd() {
-        boolean stop = false;
-        //初始化记录值
-        for (int k = 1; k < table[0].length - 1; k++) {
-            if (table[table.length - 2][k] == color) {
-                stop = true;//此时方块已到底
-                break;
-            }
-        }
-        if (!stop) {
-            for (int j = 1; j < table[0].length - 1; j++) {//列号
-                for (int i = table.length - 3; i >= 0; i--) {//行号
-                    if (table[i][j] == color && table[i + 1][j] != 0 && table[i + 1][j] != color) {
-                        stop = true;
-                        break;
-                    }
-                }
-            }
-        }
-        return stop;
-    }
-
     //scoreProcess内包含成就7”一次性消除四行条件”,成就1、3、4、5（2000、4000、6000 须添加成就显示
     //可通过判别achievement内数据进行处理
     public void scoreProcess() {
@@ -371,7 +352,6 @@ public class A extends JFrame implements KeyListener {
         }
         //label2.setText("Score:" + score);
     }
-
     public void tableProcess() {
         for (int i = 0; i < table.length - 1; i++) {
             for (int j = 1; j < table[i].length - 1; j++) {
@@ -381,7 +361,7 @@ public class A extends JFrame implements KeyListener {
         System.out.printf("Processed");
     }
 
-        public void Repaint(){
+    public void Repaint(){
         for (int i = 0; i < table.length-1; i++){
             for (int j = 1; j < table[i].length-1; j++){
                 if(table[i][j] == 2 || table[i][j] == 6) text[i][j].setBackground(Color.RED);
@@ -396,35 +376,225 @@ public class A extends JFrame implements KeyListener {
             }
         }
     }
-//    public void Repaint() {
-//        for (int i = 0; i < table.length - 1; i++) {
-//            for (int j = 1; j < table[i].length - 1; j++) {
-//                if (table[i][j] == 2) text[i][j].setBackground(Color.RED);
-//                else if (table[i][j] == 3) text[i][j].setBackground(Color.BLUE);
-//                else if (table[i][j] == 4) text[i][j].setBackground(Color.GREEN);
-//                else if (table[i][j] == 5) text[i][j].setBackground(Color.YELLOW);
-//                else if (table[i][j] > 5 & table[i][j] < 10) text[i][j].setBackground(Color.GRAY);
-//                else {
-//                    table[i][j] = 0;
-//                    text[i][j].setBackground(Color.WHITE);
-//                }
-//
-//
-//            }
-//        }
-//    }
 
-    public boolean GameOver() {
-        boolean isOver = false;
-        for (int j = 1; j < table[3].length - 1; j++) {
-            if (table[3][j] != 0) {
-                isOver = true;
-                break;
+
+    public void fall() {
+        for (int i = table.length - 2; i >= 0; i--) {//从下往上
+            for (int j = 1; j < table[0].length - 1; j++) {
+                if (table[i][j] == color && i + 1 < table.length - 1) {
+                    table[i + 1][j] = table[i][j];
+                    table[i][j] = 0;
+                }
             }
         }
-        return isOver;
     }
 
+    public boolean canRotate(int m, int n, int[][] tableBackup) {
+        //从左下角到右上角，内循环为j 得出（3,0）的相对位置
+        if (rectType < 4) {
+            if (typeNumber == 1) m++;
+            else if (typeNumber == 2){
+                n--;
+            }else{
+                n-=2;
+            }
+        } else if (rectType < 8) {
+            if (typeNumber == 0 ||typeNumber == 2) n--;
+            if (typeNumber == 3) m++;
+         else if (rectType < 12) {
+            if (typeNumber == 0) m++;
+            else n--;
+        } else if (rectType < 14) {
+                if (typeNumber == 0) n--;
+                else m--;
+            }
+        } else if (rectType < 16) {
+            if (typeNumber == 0) n = n - 1;
+            else{
+                m++;
+                n--;
+            }
+        } else if (rectType < 18) {
+            if (typeNumber == 0) n--;
+            if (typeNumber == 1) m++;
+        }
+        int countBackground = 0;
+        int countRect = 0;
+        //扫描当前游戏区域状态
+        for (int i = m; i > m-4; i--) {
+            for (int j = n; j < n + 4; j++) {
+                if (i < tableBackup.length - 1 && i >=0 && j >=1 && j < tableBackup[0].length - 1) {
+                    if (tableBackup[i][j] == color) {
+                        countRect++;
+                        tableBackup[i][j] = 0;//隐藏原有方块
+                    }
+                    if (tableBackup[i][j] != color && tableBackup[i][j] != 0) countBackground++;
+                }
+            }
+        }
+        //将旋转后的方块置入 复制的游戏区域
+        int[][] temporaryRect;
+        for (int i = m; i > m - 4; i--) {
+            for (int j = n; j < n + 4; j++) {
+                if (rectType < 12){
+                    typeNumber = (typeNumber + 1) % 4;
+                    if(rectType < 4) temporaryRect = ll.get(typeNumber);
+                    else if(rectType < 8) temporaryRect = rl.get(typeNumber);
+                    else temporaryRect = t.get(typeNumber);
+                }
+                else if (rectType < 18){
+                    typeNumber = (typeNumber + 1) % 2;
+                    if(rectType < 14) temporaryRect = z1.get(typeNumber);
+                    else if(rectType < 16) temporaryRect = z2.get(typeNumber);
+                    else temporaryRect = bar.get(typeNumber);
+                }
+                else temporaryRect = squ.get(0);
+
+                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
+                    table[i][j] = temporaryRect[i + 3 - m][j - n];
+                }
+            }
+        }
+        for (int i = m; i < m + 4; i++) {
+            for (int j = n; j < n + 4; j++) {
+                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
+                    if (tableBackup[i][j] == color) {
+                        countRect--;
+                    }
+                    if (tableBackup[i][j] != color && tableBackup[i][j] != 0) countBackground--;
+                }
+            }
+        }
+        return (countBackground == 0 && countRect == 0);
+    }
+    public void rotate() {
+        int m, n;
+        m = 0;
+        n = 0;
+        int[][] tableBackup = new int[table.length][table[0].length];//复制棋盘 并赋值
+        for (int i = 0; i < table.length; i++) {
+            System.arraycopy(table[i], 0, tableBackup[i], 0, table[i].length);
+        }
+        for (int i = table.length - 2; i >= 0; i--) {//获取m，n
+            for (int j = 1; j < table[0].length - 1; j++) {
+                if (table[i][j] == color) {
+                    m = i;
+                    n = j;
+                    break;
+                }
+            }
+        }
+
+        if(canRotate(m, n, tableBackup)) {//可以旋转，则将转后的方块赋值回到table
+            for (int i = 0; i < table.length; i++) {
+                System.arraycopy(tableBackup[i], 0, table[i], 0, table[i].length);
+            }
+        }
+        if(!canGoLeft()) {
+            //还原被更改的typeNumber
+            if(rectType == 18) typeNumber = 0;
+            else if(rectType >= 12 && rectType < 18)typeNumber =  (typeNumber-1)%2;
+            else typeNumber = (typeNumber-1)%4;
+        }
+
+    }
+
+    public boolean canGoLeft() {
+        for (int i = 0; i < table.length - 1; i++) {//从左到右扫描，一旦有撞墙或撞方块，canGoLeft → false
+            for (int j = 1; j < table[0].length - 1; j++) {
+                if (table[i][j] == color){
+                    if (table[i][j] == color && j == 1) {
+                        return false;//撞墙
+                    }
+                    if (table[i][j] == color && j > 1 && table[i][j - 1] != 0) {
+                        return false;//撞方块
+                    }
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+    public void goLeft() {
+        if (canGoLeft()) {
+            for (int i = table.length - 2; i >= 0; i--) {//左移 j-1
+                for (int j = 1; j < table[0].length - 1; j++) {
+                    if (table[i][j] == color && j > 1) {
+                        table[i][j - 1] = table[i][j];
+                        table[i][j] = 0;
+                    }
+                }
+            }
+        }
+        if (canGoLeft()) System.out.printf("CanGo~");
+        else System.out.printf("NO!!");
+        System.out.printf("A--");
+        Repaint();
+    }
+
+    public boolean canGoRight(){
+        for (int i = table.length - 2; i >= 0; i--) {
+            for (int j = table[0].length - 2; j > 0; j--) {
+                if(table[i][j] == color) {
+                    if (table[i][j] == color && j == table[0].length - 2) {
+                        return false;//撞墙
+                    }
+                    if (table[i][j] == color && j < table[0].length - 2 && table[i][j + 1] != 0) {
+                        return false;//撞方块
+                    }
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+    public void goRight() {
+        if (canGoRight()) {
+            for (int i = table.length - 2; i >= 0; i--) {//右移 j+1
+                for (int j = table[0].length - 2; j > 0; j--) {
+                    if (table[i][j] == color) {
+                        table[i][j + 1] = table[i][j];
+                        table[i][j] = 0;
+                    }
+                }
+            }
+            Repaint();
+        }
+
+    }
+
+    public void goDown() {
+        if(!atTheEnd()){
+            fall();
+            Repaint();
+        }
+        System.out.printf("GoDown~");
+    }
+
+
+    public int[][] getRect() {
+        if (rectType < 4) {
+            typeNumber = rand.nextInt(4);
+            return ll.get(typeNumber);
+        } else if (rectType < 8) {
+            typeNumber = rand.nextInt(4);
+            return rl.get(typeNumber);
+        } else if (rectType < 12) {
+            typeNumber = rand.nextInt(4);
+            return t.get(typeNumber);
+        } else if (rectType < 14) {
+            typeNumber = rand.nextInt(2);
+            return z1.get(typeNumber);
+        } else if (rectType < 16) {
+            typeNumber = rand.nextInt(2);
+            return z2.get(typeNumber);
+        } else if (rectType < 18) {
+            typeNumber = rand.nextInt(2);
+            return bar.get(typeNumber);
+        } else {
+            return squ.get(0);
+        }
+    }
 
     public void ll() {
         int[][] ll1 = new int[4][4];
@@ -456,7 +626,6 @@ public class A extends JFrame implements KeyListener {
         ll.add(ll4);
         help.add(ll4);
     }
-
     public void rl() {
         int[][] l1 = new int[4][4];
         l1[1][1] = 1;
@@ -487,7 +656,6 @@ public class A extends JFrame implements KeyListener {
         rl.add(l4);
         help.add(l4);
     }
-
     public void t() {
         int[][] t1 = new int[4][4];
         t1[1][1] = 1;
@@ -514,7 +682,6 @@ public class A extends JFrame implements KeyListener {
         t4[2][0] = 1;
         t.add(t4);
     }
-
     public void z1() {
         int[][] z11 = new int[4][4];
         z11[1][0] = 1;
@@ -529,7 +696,6 @@ public class A extends JFrame implements KeyListener {
         z12[2][1] = 1;
         z1.add(z12);
     }
-
     public void z2() {
         int[][] z21 = new int[4][4];
         z21[1][2] = 1;
@@ -547,24 +713,20 @@ public class A extends JFrame implements KeyListener {
         help.add(z22);
 
     }
-
     public void i() {
         int[][] i1 = new int[4][4];
         i1[0][1] = 1;
         i1[1][1] = 1;
         i1[2][1] = 1;
         i1[3][1] = 1;
-        i.add(i1);
+        bar.add(i1);
         int[][] i2 = new int[4][4];
         i2[2][0] = 1;
         i2[2][1] = 1;
         i2[2][2] = 1;
         i2[3][2] = 1;
-        i.add(i2);
-        help.add(i1);
-        help.add(i2);
+        bar.add(i2);
     }
-
     public void squ() {
         int[][] squ1 = new int[4][4];
         squ1[1][1] = 1;
@@ -575,191 +737,8 @@ public class A extends JFrame implements KeyListener {
         help.add(squ1);
     }
 
-    public void getRect() {
-        if (rectType < 4) {
-            typeNumber = rand.nextInt(4);
-            shape = ll.get(typeNumber);
-        } else if (rectType < 8) {
-            typeNumber = rand.nextInt(4);
-            shape = rl.get(typeNumber);
-        } else if (rectType < 12) {
-            typeNumber = rand.nextInt(4);
-            shape = t.get(typeNumber);
-        } else if (rectType < 14) {
-            typeNumber = rand.nextInt(2);
-            shape = z1.get(typeNumber);
-        } else if (rectType < 16) {
-            typeNumber = rand.nextInt(2);
-            shape = z2.get(typeNumber);
-        } else if (rectType < 18) {
-            typeNumber = rand.nextInt(2);
-            shape = i.get(typeNumber);
-        } else {
-            shape = squ.get(0);
-        }
-    }
-
-    public boolean canRotate(int m, int n, int[][] tableBackup) {
-        if (rectType < 4) {
-            if (typeNumber == 1) m = m + 1;
-            if (typeNumber == 2) n = n - 1;
-            if (typeNumber == 3) n = n - 2;
-        } else if (rectType < 8) {
-            if (typeNumber == 0) n = n - 1;
-            if (typeNumber == 2) m = m - 1;
-            if (typeNumber == 3) m = m + 1;
-        } else if (rectType < 12) {
-            if (typeNumber == 0) m = m - 1;
-            if (typeNumber == 1 || typeNumber == 2 || typeNumber == 3) n = n - 1;
-        } else if (rectType < 14) {
-            if (typeNumber == 0) n = n - 1;
-            if (typeNumber == 1) m = m + 1;
-        } else if (rectType < 16) {
-            if (typeNumber == 0) n = n - 1;
-            if (typeNumber == 1) {
-                m = m + 1;
-                n = n - 1;
-            }
-        } else if (rectType < 18) {
-            if (typeNumber == 0) n = n - 1;
-            if (typeNumber == 1) m = m - 1;
-        }
-        int countBackground = 0;
-        int countRect = 0;
-        for (int i = m; i < m + 4; i++) {
-            for (int j = n; j < n + 4; j++) {
-                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
-                    if (tableBackup[i][j] == color) {
-                        countRect++;
-                        tableBackup[i][j] = 0;//隐藏原有方块
-                    }
-                    if (tableBackup[i][j] != color && tableBackup[i][j] != 0) countBackground++;
-                }
-            }
-        }
-        for (int i = m; i < m + 4; i++) {//将旋转后的方块置入 复制的游戏区域
-            for (int j = n; j < n + 4; j++) {
-                if (rectType < 12) typeNumber = (typeNumber + 1) % 4;
-                else if (rectType < 18) typeNumber = (typeNumber + 1) % 2;
-                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
-                    table[i][j] = shape[i - m][j - n];
-                }
-            }
-        }
-        for (int i = m; i < m + 4; i++) {
-            for (int j = n; j < n + 4; j++) {
-                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
-                    if (tableBackup[i][j] == color) {
-                        countRect--;
-                    }
-                    if (tableBackup[i][j] != color && tableBackup[i][j] != 0) countBackground--;
-                }
-            }
-        }
-        return (countBackground == 0 && countRect == 0);
-    }
-
-    public void rotate() {
-        int m, n;
-        m = 0;
-        n = 0;
-        int[][] tableBackup = new int[table.length][table[0].length];//复制棋盘
-        for (int i = 0; i < table.length; i++) {
-            System.arraycopy(table[i], 0, tableBackup[i], 0, table[i].length);
-        }
-        for (int i = table.length - 2; i >= 0; i--) {
-            for (int j = 1; j < table[0].length - 1; j++) {
-                if (table[i][j] == color) {
-                    m = i;
-                    n = j;
-                    break;
-                }
-            }
-        }
-
-        if (canRotate(m, n, tableBackup)) {//可以旋转，则将转后的方块赋值回到table
-            for (int i = 0; i < table.length; i++) {
-                System.arraycopy(tableBackup[i], 0, table[i], 0, table[i].length);
-            }
-        }
 
 
-    }
-
-    public boolean canGoLeft() {
-        for (int i = 0; i < table.length - 1; i++) {//从左到右扫描，一旦有撞墙或撞方块，canGoLeft → false
-            for (int j = 1; j < table[0].length - 1; j++) {
-                if (table[i][j] == color){
-                    if (table[i][j] == color && j == 1) {
-                        return false;//撞墙
-                    }
-                    if (table[i][j] == color && j > 1 && table[i][j - 1] != 0) {
-                        return false;//撞方块
-                    }
-                    break;
-                }
-            }
-        }
-        return true;
-    }
-
-    public void goLeft() {
-        if (canGoLeft()) {
-            for (int i = table.length - 2; i >= 0; i--) {//左移 j-1
-                for (int j = 1; j < table[0].length - 1; j++) {
-                    if (table[i][j] == color && j > 1) {
-                        table[i][j - 1] = table[i][j];
-                        table[i][j] = 0;
-                    }
-                }
-            }
-        }
-        if (canGoLeft()) System.out.printf("CanGo~");
-        else System.out.printf("NO!!");
-        System.out.printf("A--");
-        Repaint();
-    }
-
-    public boolean canGoRight(){
-        for (int i = table.length - 2; i >= 0; i--) {
-            for (int j = table[0].length - 2; j > 0; j--) {
-                if(table[i][j] == color) {
-                    if (table[i][j] == color && j == table[0].length - 2) {
-                        return false;//撞墙
-                    }
-                    if (table[i][j] == color && j < table[0].length - 2 && table[i][j + 1] != 0) {
-                       return false;//撞方块
-                    }
-                    break;
-                }
-            }
-        }
-        return true;
-    }
-    public void goRight() {
-        if (canGoRight()) {
-            for (int i = table.length - 2; i >= 0; i--) {//右移 j+1
-                for (int j = table[0].length - 2; j > 0; j--) {
-                    if (table[i][j] == color) {
-                        table[i][j + 1] = table[i][j];
-                        table[i][j] = 0;
-                    }
-                }
-            }
-            Repaint();
-        }
-
-    }
-
-    public void goDown() {
-        if(!atTheEnd()){
-            fall();
-            Repaint();
-        }
-        System.out.printf("GoDown~");
-    }
-
-    //public void
 
     //@Override
     public void keyTyped(KeyEvent e) {
