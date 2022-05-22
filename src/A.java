@@ -141,8 +141,9 @@ public class A extends JFrame implements KeyListener {
             color = rand.nextInt(4) + 2;
             rectType = 0;
             typeNumber = 0;
-            rectType = 18;
-            //rectType = rand.nextInt(19);
+
+            //rectType =13;
+            rectType = rand.nextInt(19);
             int[][] shape = getRect();//获取随机的一个方块
                 System.out.print(color + " " + rectType + " " + typeNumber + "   ");
 
@@ -446,25 +447,33 @@ public class A extends JFrame implements KeyListener {
             if (typeNumber == 1) m++;
             else if (typeNumber == 2){
                 n--;
-            }else{
+            }else if (typeNumber == 3){
                 n-=2;
             }
-        } else if (rectType < 8) {
-            if (typeNumber == 0 ||typeNumber == 2) n--;
+        }
+        else if (rectType < 8) {
+            if (typeNumber == 0 || typeNumber == 2) n--;
             if (typeNumber == 3) m++;
-            else if (rectType < 12) {
+        }
+        else if (rectType < 12) {
                 if (typeNumber == 0) m++;
                 else n--;
-            } else if (rectType < 14) {
-                if (typeNumber == 0) n--;
-                else m--;
             }
-        } else if (rectType < 16) {
+        //z1
+        else if (rectType < 14) {
+                if (typeNumber == 0) {
+                    n--;
+                }
+                else m++;
+            }
+        //z2
+         else if (rectType < 16) {
             if (typeNumber == 0) n = n - 1;
             else{
                 m++;
                 n--;
             }
+            //bar
         } else if (rectType < 18) {
             if (typeNumber == 0) n--;
             if (typeNumber == 1) m++;
@@ -482,7 +491,7 @@ public class A extends JFrame implements KeyListener {
             }
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
-                    if(temporaryRect[i][j] != 0) table[m-3+i][j+n] = color;
+                    if(temporaryRect[i][j] != 0) table[m-3+i][n+j] = color;
                 }
             }
             Repaint();
