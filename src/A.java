@@ -33,7 +33,7 @@ public class A extends JFrame implements KeyListener {
     ArrayList<int[][]> z2 = new ArrayList<>();
     ArrayList<int[][]> bar = new ArrayList<>();
     ArrayList<int[][]> squ = new ArrayList<>();
-    ArrayList<int[][]> help = new ArrayList<>();
+    int[][] temporaryRect;
 
 
 
@@ -389,7 +389,7 @@ public class A extends JFrame implements KeyListener {
         }
     }
 
-    public boolean canRotate(int m, int n, int[][] tableBackup) {
+    public boolean canRotate(int m , int n) {
         //从左下角到右上角，内循环为j 得出（3,0）的相对位置
         if (rectType < 4) {
             if (typeNumber == 1) m++;
@@ -418,66 +418,39 @@ public class A extends JFrame implements KeyListener {
             if (typeNumber == 0) n--;
             if (typeNumber == 1) m++;
         }
-        int countBackground = 0;
-        int countRect = 0;
-        //扫描当前游戏区域状态
-        for (int i = m; i > m-4; i--) {
-            for (int j = n; j < n + 4; j++) {
-                if (i < tableBackup.length - 1 && i >=0 && j >=1 && j < tableBackup[0].length - 1) {
-                    if (tableBackup[i][j] == color) {
-                        countRect++;
-                        tableBackup[i][j] = 0;//隐藏原有方块
-                    }
-                    if (tableBackup[i][j] != color && tableBackup[i][j] != 0) countBackground++;
-                }
-            }
-        }
-        //将旋转后的方块置入 复制的游戏区域
-        int[][] temporaryRect;
-        for (int i = m; i > m - 4; i--) {
-            for (int j = n; j < n + 4; j++) {
-                if (rectType < 12){
-                    typeNumber = (typeNumber + 1) % 4;
-                    if(rectType < 4) temporaryRect = ll.get(typeNumber);
-                    else if(rectType < 8) temporaryRect = rl.get(typeNumber);
-                    else temporaryRect = t.get(typeNumber);
-                }
-                else if (rectType < 18){
-                    typeNumber = (typeNumber + 1) % 2;
-                    if(rectType < 14) temporaryRect = z1.get(typeNumber);
-                    else if(rectType < 16) temporaryRect = z2.get(typeNumber);
-                    else temporaryRect = bar.get(typeNumber);
-                }
-                else temporaryRect = squ.get(0);
+        //获取对应方块
+        if (rectType < 12){
+            typeNumber = (typeNumber + 1) % 4;
+            if(rectType < 4) temporaryRect = ll.get(typeNumber);
+            else if(rectType < 8) temporaryRect = rl.get(typeNumber);
+            else temporaryRect = t.get(typeNumber);
+        } else if (rectType < 18){
+            typeNumber = (typeNumber + 1) % 2;
+            if(rectType < 14) temporaryRect = z1.get(typeNumber);
+            else if(rectType < 16) temporaryRect = z2.get(typeNumber);
+            else temporaryRect = bar.get(typeNumber);
+        } else temporaryRect = squ.get(0);
 
-                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
-                    table[i][j] = temporaryRect[i + 3 - m][j - n];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(temporaryRect[i][j] != 0){
+                    //判断目标方块的有色区域 如果进入table是否越界
+                    if( !(m-3+i >= 0 && m-3+i < table.length-1 && n+j >=1 && n + j < table[0].length-1)) return false;
+                    //如果没有越界，判断 目标方块的有色区域 是否和table已经堆叠的方块重叠
+                    else if (table[m-3+i][j+n] != 0 && table[m-3+i][j+n] != color) return false;
                 }
             }
         }
-        for (int i = m; i < m + 4; i++) {
-            for (int j = n; j < n + 4; j++) {
-                if (i < tableBackup.length - 1 && i > 0 && j > 1 && j < tableBackup[0].length - 1) {
-                    if (tableBackup[i][j] == color) {
-                        countRect--;
-                    }
-                    if (tableBackup[i][j] != color && tableBackup[i][j] != 0) countBackground--;
-                }
-            }
-        }
-        return (countBackground == 0 && countRect == 0);
+        return true;
     }
     public void rotate() {
         int m, n;
         m = 0;
         n = 0;
-        int[][] tableBackup = new int[table.length][table[0].length];//复制棋盘 并赋值
-        for (int i = 0; i < table.length; i++) {
-            System.arraycopy(table[i], 0, tableBackup[i], 0, table[i].length);
-        }
-        for (int i = table.length - 2; i >= 0; i--) {//获取m，n
-            for (int j = 1; j < table[0].length - 1; j++) {
-                if (table[i][j] == color) {
+        //获取方块最下面那行的首个色块的位置
+        for (int i = 0; i < table.length-1; i++) {
+            for (int j = 1; j < table[0].length-1; j++) {
+                if(table[i][j] == color ) {
                     m = i;
                     n = j;
                     break;
@@ -485,12 +458,23 @@ public class A extends JFrame implements KeyListener {
             }
         }
 
-        if(canRotate(m, n, tableBackup)) {//可以旋转，则将转后的方块赋值回到table
-            for (int i = 0; i < table.length; i++) {
-                System.arraycopy(tableBackup[i], 0, table[i], 0, table[i].length);
+        //扫除原有方块并将新方块绘制到table上
+        if(canRotate(m,n)){
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                   if (table[m-3+i][j+n] == color) {
+                       table[m-3+i][j+n] = 0;
+                   }
+                }
+            }
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if(temporaryRect[i][j] != 0) table[m-3+i][j+n] = color;
+                }
             }
         }
-        if(!canGoLeft()) {
+        Repaint();
+        if(canRotate(m,n)) {
             //还原被更改的typeNumber
             if(rectType == 18) typeNumber = 0;
             else if(rectType >= 12 && rectType < 18)typeNumber =  (typeNumber-1)%2;
@@ -603,28 +587,24 @@ public class A extends JFrame implements KeyListener {
         ll1[3][1] = 1;
         ll1[3][0] = 1;
         ll.add(ll1);
-
         int[][] ll2 = new int[4][4];
         ll2[1][0] = 1;
         ll2[2][0] = 1;
         ll2[2][1] = 1;
         ll2[2][2] = 1;
         ll.add(ll2);
-        help.add(ll2);
         int[][] ll3 = new int[4][4];
         ll3[1][2] = 1;
         ll3[1][1] = 1;
         ll3[2][1] = 1;
         ll3[3][1] = 1;
         ll.add(ll3);
-        help.add(ll3);
         int[][] ll4 = new int[4][4];
         ll4[2][0] = 1;
         ll4[2][1] = 1;
         ll4[2][2] = 1;
         ll4[3][2] = 1;
         ll.add(ll4);
-        help.add(ll4);
     }
     public void rl() {
         int[][] l1 = new int[4][4];
@@ -633,28 +613,24 @@ public class A extends JFrame implements KeyListener {
         l1[3][1] = 1;
         l1[3][2] = 1;
         rl.add(l1);
-        help.add(l1);
         int[][] l2 = new int[4][4];
         l2[3][0] = 1;
         l2[2][0] = 1;
         l2[2][1] = 1;
         l2[2][2] = 1;
         rl.add(l2);
-        help.add(l2);
         int[][] l3 = new int[4][4];
         l3[1][0] = 1;
         l3[1][1] = 1;
         l3[2][1] = 1;
         l3[3][1] = 1;
         rl.add(l3);
-        help.add(l3);
         int[][] l4 = new int[4][4];
         l4[2][0] = 1;
         l4[2][1] = 1;
         l4[2][2] = 1;
         l4[1][2] = 1;
         rl.add(l4);
-        help.add(l4);
     }
     public void t() {
         int[][] t1 = new int[4][4];
@@ -709,8 +685,6 @@ public class A extends JFrame implements KeyListener {
         z22[2][1] = 1;
         z22[2][2] = 1;
         z2.add(z22);
-        help.add(z21);
-        help.add(z22);
 
     }
     public void i() {
@@ -734,7 +708,6 @@ public class A extends JFrame implements KeyListener {
         squ1[2][1] = 1;
         squ1[2][2] = 1;
         squ.add(squ1);
-        help.add(squ1);
     }
 
 
