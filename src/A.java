@@ -211,8 +211,7 @@ public class A extends JFrame implements KeyListener {
             }
         }
         getRect();//根据rand1和rand2 对shape赋值
-        System.out.print(color + " " + rectType + " " + typeNumber + "   ");
-
+        System.out.println(color + " " + rectType + " " + typeNumber + "   ");
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (shape[i][j] == 1) {
@@ -223,10 +222,10 @@ public class A extends JFrame implements KeyListener {
         }
         for (int[] i : shape) {
             for (int j : i) {
-                System.out.printf(j + " ");
+                System.out.println(j + " ");
             }
         }
-        System.out.printf("\n");
+        System.out.println("\n");
 
         Repaint();
         Thread.sleep(90);
@@ -240,7 +239,6 @@ public class A extends JFrame implements KeyListener {
                 Thread.sleep(500);
                 //自动下移
             } else break;
-//ghhjk
 
         }
     }
@@ -444,21 +442,21 @@ public class A extends JFrame implements KeyListener {
         ll2[2][1] = 1;
         ll2[2][2] = 1;
         ll.add(ll2);
-        help.add(ll2);
+
         int[][] ll3 = new int[4][4];
         ll3[1][2] = 1;
         ll3[1][1] = 1;
         ll3[2][1] = 1;
         ll3[3][1] = 1;
         ll.add(ll3);
-        help.add(ll3);
+
         int[][] ll4 = new int[4][4];
         ll4[2][0] = 1;
         ll4[2][1] = 1;
         ll4[2][2] = 1;
         ll4[3][2] = 1;
         ll.add(ll4);
-        help.add(ll4);
+
     }
 
     public void rl() {
@@ -468,28 +466,28 @@ public class A extends JFrame implements KeyListener {
         l1[3][1] = 1;
         l1[3][2] = 1;
         rl.add(l1);
-        help.add(l1);
+
         int[][] l2 = new int[4][4];
         l2[3][0] = 1;
         l2[2][0] = 1;
         l2[2][1] = 1;
         l2[2][2] = 1;
         rl.add(l2);
-        help.add(l2);
+
         int[][] l3 = new int[4][4];
         l3[1][0] = 1;
         l3[1][1] = 1;
         l3[2][1] = 1;
         l3[3][1] = 1;
         rl.add(l3);
-        help.add(l3);
+
         int[][] l4 = new int[4][4];
         l4[2][0] = 1;
         l4[2][1] = 1;
         l4[2][2] = 1;
         l4[1][2] = 1;
         rl.add(l4);
-        help.add(l4);
+
     }
 
     public void t() {
@@ -547,9 +545,6 @@ public class A extends JFrame implements KeyListener {
         z22[2][1] = 1;
         z22[2][2] = 1;
         z2.add(z22);
-        help.add(z21);
-        help.add(z22);
-
     }
 
     public void i() {
@@ -565,8 +560,7 @@ public class A extends JFrame implements KeyListener {
         i2[2][2] = 1;
         i2[3][2] = 1;
         i.add(i2);
-        help.add(i1);
-        help.add(i2);
+
     }
 
     public void squ() {
@@ -576,7 +570,7 @@ public class A extends JFrame implements KeyListener {
         squ1[2][1] = 1;
         squ1[2][2] = 1;
         squ.add(squ1);
-        help.add(squ1);
+
     }
 
     public void getRect() {
