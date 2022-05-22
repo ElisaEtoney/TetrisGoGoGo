@@ -18,7 +18,6 @@ public class A extends JFrame implements KeyListener {
     int score = 0;
     int time;
 
-
     int[] completeLine;
     int lineCounter;
     Random rand = new Random();
@@ -42,7 +41,7 @@ public class A extends JFrame implements KeyListener {
 
 
     public void initWindow() {
-        this.setSize(400, 600);
+        this.setSize(600, 800);
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,7 +67,7 @@ public class A extends JFrame implements KeyListener {
                 gameMain.add(text[i][j]);
             }
         }
-        this.setLayout(new BorderLayout());
+        this.setLayout(new BorderLayout(100,60));
         this.add(gameMain, BorderLayout.CENTER);
     }
 
@@ -94,7 +93,6 @@ public class A extends JFrame implements KeyListener {
     }
 
     public A() {
-
         text = new JTextArea[game_x][game_y];
         table = new int[game_x][game_y];
 
@@ -222,10 +220,10 @@ public class A extends JFrame implements KeyListener {
         }
         for (int[] i : shape) {
             for (int j : i) {
-                System.out.println(j + " ");
+                System.out.print(j + " ");
             }
         }
-        System.out.println("\n");
+        System.out.print("\n");
 
         Repaint();
         Thread.sleep(90);
@@ -286,7 +284,6 @@ public class A extends JFrame implements KeyListener {
                 for (int j = 1; j < table[i].length - 1; j++) table[i][j] = 0;
             }
         }
-        //RePaint
         Repaint();
         Thread.sleep(time);
     }
@@ -385,7 +382,7 @@ public class A extends JFrame implements KeyListener {
                 if (table[i][j] < 6 && table[i][j] >= 2) table[i][j] = table[i][j] + 4;
             }
         }
-        System.out.printf("Processed");
+        System.out.println("Processed");
     }
 
         public void Repaint(){
@@ -751,12 +748,10 @@ public class A extends JFrame implements KeyListener {
     public void goDown() {
         if(!atTheEnd()) fall();
         System.out.printf("goDown~");
-        repaint();
+        Repaint();
     }
 
-    //public void
-
-    //@Override
+    @Override
     public void keyTyped(KeyEvent e) {
 
     }
