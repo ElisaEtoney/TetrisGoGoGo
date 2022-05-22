@@ -1,3 +1,4 @@
+import sun.awt.windows.ThemeReader;
 import sun.security.mscapi.CPublicKey;
 
 import javax.swing.*;
@@ -28,7 +29,6 @@ public class A extends JFrame implements KeyListener {
     //成就
     int[] achievement;
     int rectNumber = 0;//已获得方块数量
-    boolean[] atEnd = new boolean[10];
     int rectType;//定位方块类型
     int typeNumber;
     ArrayList<int[][]> rl = new ArrayList<>();
@@ -39,6 +39,7 @@ public class A extends JFrame implements KeyListener {
     ArrayList<int[][]> i = new ArrayList<>();
     ArrayList<int[][]> squ = new ArrayList<>();
     ArrayList<int[][]> help = new ArrayList<>();
+
 
 
     public void initWindow() {
@@ -163,7 +164,45 @@ public class A extends JFrame implements KeyListener {
         //游戏开始，结束时退出循环
         while (true) {
             //方块产生并运动 触底即退出运动循环
-            rectRun();
+            color = 0;
+            color = rand.nextInt(4) + 2;
+            rectType = 0;
+            typeNumber = 0;
+            rectType = rand.nextInt(19);
+            for (int j = 0; j < 4; j++) {
+                for (int k = 0; k < 4; k++) {
+                    shape[j][k] = 0;
+                }
+            }
+            getRect();//根据rand1和rand2 对shape赋值
+            System.out.print(color + " " + rectType + " " + typeNumber + "   ");
+
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (shape[i][j] == 1) {
+                        shape[i][j] = color;//将初始色改为color编号；
+                        table[i][j + 4] = color;
+                    }                      //以上完成方块种类以及颜色的随机生成
+                }
+            }
+            for (int[] i : shape) {
+                for (int j : i) {
+                    System.out.printf(j + " ");
+                }
+            }
+            System.out.printf("\n");
+            Repaint();
+            //Thread.sleep(90);
+
+            while (true) {//方块移动 触底时退出
+                if (!atTheEnd() && fault()) {
+                    fall();
+                    //时间间隔
+                    Repaint();
+                    Thread.sleep(500);
+                    //自动下移
+                } else break;
+            }
             //已获得方块计数
             rectNumber++;
             //System.out.println("2");
@@ -174,6 +213,7 @@ public class A extends JFrame implements KeyListener {
             System.out.println("recorded");
             //分数处理
             scoreProcess();
+            label2 = new JLabel("Score: " + score);
             System.out.println("scoreProcessed");
             //消除满足条件的行 内含Repaint() 已加入时停
             erasure();
@@ -191,58 +231,9 @@ public class A extends JFrame implements KeyListener {
     }
 
 
-    //去除Repaint
-    public void rectAppear() {
-        //随机方块颜色
-
-    }
-
     //含有Repaint()
     public void rectRun() throws InterruptedException {
-        //方块产生
-        color = 0;
-        color = rand.nextInt(4) + 2;
-        rectType = 0;
-        typeNumber = 0;
-        rectType = rand.nextInt(19);
-        for (int j = 0; j < 4; j++) {
-            for (int k = 0; k < 4; k++) {
-                shape[j][k] = 0;
-            }
-        }
-        getRect();//根据rand1和rand2 对shape赋值
-        System.out.print(color + " " + rectType + " " + typeNumber + "   ");
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (shape[i][j] == 1) {
-                    shape[i][j] = color;//将初始色改为color编号；
-                    table[i][j + 4] = color;
-                }                      //以上完成方块种类以及颜色的随机生成
-            }
-        }
-        for (int[] i : shape) {
-            for (int j : i) {
-                System.out.printf(j + " ");
-            }
-        }
-        System.out.printf("\n");
-
-        Repaint();
-        Thread.sleep(90);
-
-
-        while (true) {//方块移动 触底时退出
-            if (!atTheEnd() && fault()) {
-                fall();
-                //时间间隔
-                Repaint();
-                Thread.sleep(500);
-                //自动下移
-            } else break;
-
-
-        }
     }
 
     public boolean fault() {
@@ -330,7 +321,7 @@ public class A extends JFrame implements KeyListener {
     public boolean atTheEnd() {
         boolean stop = false;
         //初始化记录值
-        for (int k = 1; k < table[0].length - 2; k++) {
+        for (int k = 1; k < table[0].length - 1; k++) {
             if (table[table.length - 2][k] == color) {
                 stop = true;//此时方块已到底
                 break;
