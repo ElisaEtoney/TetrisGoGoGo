@@ -285,6 +285,7 @@ public class A extends JFrame implements KeyListener {
 
     public void record() {
         int count;
+        lineCounter=0;
         for (int i = table.length - 2; i >= 4; i--) {//从下至上，记录满足条件的整行方块
             //对单行方块  计数
             count = 0;//初始化count值，对单行方块计数
