@@ -121,7 +121,8 @@ public class A extends JFrame implements KeyListener {
             color = rand.nextInt(4) + 2;
             rectType = 0;
             typeNumber = 0;
-            rectType = rand.nextInt(19);
+            rectType = 18;
+            //rectType = rand.nextInt(19);
             int[][] shape = getRect();//获取随机的一个方块
                 System.out.print(color + " " + rectType + " " + typeNumber + "   ");
 
@@ -390,7 +391,6 @@ public class A extends JFrame implements KeyListener {
     }
 
     public boolean canRotate(int m , int n) {
-        if(typeNumber == 18) return false;
         //获取对应方块
         if (rectType < 12){
             typeNumber = (typeNumber + 1) % 4;
@@ -461,7 +461,7 @@ public class A extends JFrame implements KeyListener {
 
 
         //扫除原有方块并将新方块绘制到table上
-        if(canRotate(m,n)){
+        if(rectType != 18 && canRotate(m,n) ){
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                    if (table[m-3+i][j+n] == color) {
