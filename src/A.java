@@ -761,8 +761,11 @@ public class A extends JFrame implements KeyListener {
     }
 
     public void goDown() {
-
-
+        if(!atTheEnd()){
+            fall();
+            Repaint();
+        }
+        System.out.printf("GoDown~");
     }
 
     //public void
