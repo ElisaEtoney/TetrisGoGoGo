@@ -7,9 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class A extends JFrame implements KeyListener {
     private static final int game_x = 21;
@@ -40,6 +38,7 @@ public class A extends JFrame implements KeyListener {
     Font font2 = new Font("Let's go Digital",Font.BOLD,20);
     Font font3 = new Font("黑体",Font.PLAIN,20);
     int gameState = 0;
+    ArrayList<Integer> scoreRank = new ArrayList<>();
 
     ArrayList<int[][]> L = new ArrayList<>();
     ArrayList<int[][]> J = new ArrayList<>();
@@ -185,17 +184,11 @@ public class A extends JFrame implements KeyListener {
             achievementsJudge(5);
             //成就提醒
         }
+        scoreRank.add(score);
+        scoreRanking();
         recordAchievement();
     }
 
-    public void gamePause(){
-        for (int i = 0; i < table.length; i++) {
-            for (int j = 0; j < table[0].length; j++) {
-
-            }
-
-        }
-    }
     //数据初始化
     public void initialize() throws FileNotFoundException {
         J();
@@ -224,14 +217,19 @@ public class A extends JFrame implements KeyListener {
             }
         }
         //读取成就
-        File file1 = new File("achievement.txt");
-        Scanner sc = new Scanner(file1);
-        while (sc.hasNext()){
-            achievement.add(sc.nextInt());
+        File ac = new File("achievement.txt");
+        Scanner acRead = new Scanner(ac);
+        while (acRead.hasNext()){
+            achievement.add(acRead.nextInt());
         }
-        sc.close();
-
-
+        acRead.close();
+        //读取分数记录
+        File sco = new File("scoreRank.txt");
+        Scanner scoreRead = new Scanner(sco);
+        while (scoreRead.hasNext()){
+            scoreRank.add(scoreRead.nextInt());
+        }
+        scoreRead.close();
     }
 
 
@@ -245,10 +243,10 @@ public class A extends JFrame implements KeyListener {
 
     }
     public void recordAchievement() throws FileNotFoundException {
-        java.io.File file2 = new java.io.File("achievement.txt");
-        PrintWriter output = new PrintWriter(file2);
-        for(int i : achievement) output.print(i + " ");
-        output.close();
+        java.io.File ac = new java.io.File("achievement.txt");
+        PrintWriter acWrite = new PrintWriter(ac);
+        for(int i : achievement) acWrite.print(i + " ");
+        acWrite.close();
     }
 
     //一些判断方法
@@ -284,6 +282,16 @@ public class A extends JFrame implements KeyListener {
         return isOver;
     }
 
+    public void scoreRanking() throws FileNotFoundException {
+        java.io.File sco = new java.io.File("scoreRank.txt");
+        PrintWriter scoWrite = new PrintWriter(sco);
+        Collections.sort(scoreRank);
+        for (int i =  4; i > 0; i--) {
+            scoWrite.print(scoreRank.get(i) + " ");
+        }
+        for(int i : scoreRank) System.out.printf(i + " ");
+        scoWrite.close();
+    }
     //方块触底后进行的操作
     public void record() {
         int count;
