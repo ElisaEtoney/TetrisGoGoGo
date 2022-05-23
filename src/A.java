@@ -375,7 +375,7 @@ public class A extends JFrame implements KeyListener {
     public void tableProcess() {
         for (int i = 0; i < table.length - 1; i++) {
             for (int j = 1; j < table[i].length - 1; j++) {
-                if (table[i][j] < 6 && table[i][j] >= 2) table[i][j] = table[i][j] + 4;
+                if (table[i][j] < 8 && table[i][j] >= 2) table[i][j] = table[i][j] + 6;
             }
         }
     }
@@ -384,10 +384,12 @@ public class A extends JFrame implements KeyListener {
     public void Repaint(){
         for (int i = 0; i < table.length-1; i++){
             for (int j = 1; j < table[i].length-1; j++){
-                if(table[i][j] == 2 || table[i][j] == 6) text[i][j].setBackground(new Color(177,114,226));
-                else if(table[i][j] == 3 || table[i][j] == 7) text[i][j].setBackground(new Color(000,204,177));
-                else if(table[i][j] == 4 || table[i][j] == 8) text[i][j].setBackground(new Color(107,155,210));
-                else if(table[i][j] == 5 || table[i][j] == 9) text[i][j].setBackground(new Color(248,210,227));
+                if(table[i][j] == 2 || table[i][j] == 8) text[i][j].setBackground(new Color(136,74,189));
+                else if(table[i][j] == 3 || table[i][j] == 9) text[i][j].setBackground(new Color(51,203,178));
+                else if(table[i][j] == 4 || table[i][j] == 10) text[i][j].setBackground(new Color(25,153,178));
+                else if(table[i][j] == 5 || table[i][j] == 11) text[i][j].setBackground(new Color(0,102,160));
+                else if(table[i][j] == 6 || table[i][j] == 12) text[i][j].setBackground(new Color(90,80,160));
+                else if(table[i][j] == 7 || table[i][j] == 13) text[i][j].setBackground(new Color(234,165,178));
                 else if(table[i][j] == 0) text[i][j].setBackground(Color.WHITE);
             }
         }
@@ -578,7 +580,7 @@ public class A extends JFrame implements KeyListener {
 
     //方块初始化和获得随机方块
     public void getRandomRect() {
-        color = rand.nextInt(4) + 2;
+        color = rand.nextInt(6) + 2;
         rectType = rand.nextInt(19);
         if (rectType < 4) {
             typeNumber = rand.nextInt(4);
