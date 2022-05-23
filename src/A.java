@@ -1,5 +1,3 @@
-import sun.security.mscapi.CPublicKey;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -16,20 +14,21 @@ public class A extends JFrame implements KeyListener {
     JLabel label1,label2,label3;
     JTextField scoreField,gameField;
     JLabel hint1,hint2,hint3,hint4;
-//    JButton
-
     int score = 0;
     int time;
-
 
     int[] completeLine;
     int lineCounter;
     Random rand = new Random();
     int color;
+    int[][] shape;
     //成就
     int[] achievement;
+    String[] achievementContent;
     int rectNumber = 0;//已获得方块数量
     int rectType;//定位方块类型
+    int recType_Achievement;
+    int theSameRecType_Achievement;
     int typeNumber;
     Font font1 = new Font("方正姚体",Font.PLAIN,20);
     Font font2 = new Font("Let's go Digital",Font.BOLD,30);
@@ -43,7 +42,6 @@ public class A extends JFrame implements KeyListener {
     ArrayList<int[][]> bar = new ArrayList<>();
     ArrayList<int[][]> squ = new ArrayList<>();
     int[][] temporaryRect;
-
 
 
     public void initWindow() {
@@ -92,7 +90,7 @@ public class A extends JFrame implements KeyListener {
         label3 = new JLabel("Your Score:",JLabel.LEFT);
         label3.setFont(font2);
 
-        scoreField = new JTextField(score + "");
+        scoreField = new JTextField(score + " 方块数量" + rectNumber);
         scoreField.setFont(font2);
         scoreField.setEditable(false);
 
@@ -132,43 +130,31 @@ public class A extends JFrame implements KeyListener {
 
     //gameRun包含成就6
     public void gameRun() throws InterruptedException {
+        time = 700;
         initialize();
         System.out.println("Go!");
         //游戏开始，结束时退出循环
+
+
+        getRandomRect();
+        recType_Achievement = rectType;
+
         while (true) {
-            //方块产生并运动 触底即退出运动循环
-            color = 0;
-            color = rand.nextInt(4) + 2;
-            rectType = 0;
-            typeNumber = 0;
-
-            //rectType =13;
-            rectType = rand.nextInt(19);
-            int[][] shape = getRect();//获取随机的一个方块
-                System.out.print(color + " " + rectType + " " + typeNumber + "   ");
-
-                for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    if (shape[i][j] == 1) {
-                        table[i][j + 4] = color;//将初始色改为color编号；
-                    }                      //以上完成方块种类以及颜色的随机生成
-                }
+            if(recType_Achievement  == rectType){
+                theSameRecType_Achievement++;
             }
-                for (int[] i : shape) {
-                for (int j : i) {
-                    System.out.printf(j + " ");
-                }
+            else{
+                recType_Achievement = 0;
+                theSameRecType_Achievement = 0;
             }
-                System.out.printf("\n");
+            if(theSameRecType_Achievement == 3 ) System.out.printf("The lucky dog!!");
 
-
-            Repaint();
             while (true) {//方块移动 触底时退出
                 if (!atTheEnd() ) {
                     fall();
                     //时间间隔
                     Repaint();
-                    Thread.sleep(700);
+                    Thread.sleep(600);
                     //自动下移
                 } else break;
             }
@@ -177,18 +163,18 @@ public class A extends JFrame implements KeyListener {
             //触底后，状态判断
             //record记录游戏区域状态 记录lineCounter
             record();
-            System.out.println("recorded");
             //分数处理
             scoreProcess();
-            label2 = new JLabel("Score: " + score);
+            //label2 = new JLabel("Score: " + score + "  " + rectNumber);
             //消除满足条件的行 内含Repaint() 已加入时停
             erasure();
             //下移 内含Repaint() 已加入时停
             moveDown();
             tableProcess();//将colorNum + 4，改为对应颜色值 (2、3、4、5 对应 6、7、8、9）
             if (GameOver()) break;
+            //方块产生并运动 触底即退出运动循环
+            getRandomRect();
         }
-        System.out.println("\nover");
         label1 = new JLabel("Good boy go~");
         if (rectNumber <= 6 && achievement[5] == 0) {
             achievement[5] = 1;
@@ -196,20 +182,29 @@ public class A extends JFrame implements KeyListener {
         }
     }
 
+
+
     public void initialize(){
         ll();
         rl();
         t();
         z1();
         z2();
-        i();
+        bar();
         squ();
-        time = 10;
         completeLine = new int[table.length];
         score = 0;//分数
         //成就数据
         achievement = new int[7];
+        achievementContent = new String[7];
+        achievementContent[0] = "获得1000分且获得方块不多于50";
         rectNumber = 0;
+
+        //获得方块所用的参数：
+        color = 0;
+        rectType = 0;
+        typeNumber = 0;
+        theSameRecType_Achievement = 0;
         for (int i = 0; i < table.length - 1; i++) {
             for (int j = 1; j < table[i].length - 1; j++) {
                 table[i][j] = 0;
@@ -241,15 +236,21 @@ public class A extends JFrame implements KeyListener {
         this.addKeyListener(listener);
         this.requestFocus();
     }
-    //这个方法虽然现在不用，但先不要删除代码
-    public boolean gotRightRect() {
-        for (int j = 0; j < table.length; j++) {
-            for (int k = 0; k < table[0].length; k++) {
-                if (table[j][k] == color) return true;
+
+    public void getRandomRect(){
+        color = rand.nextInt(4) + 2;
+        rectType = rand.nextInt(19);
+        shape = getRect();//获取随机的一个方块
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (shape[i][j] == 1) {
+                    table[i][j + 4] = color;//将初始色改为color编号；
+                }                      //以上完成方块种类以及颜色的随机生成
             }
         }
-        return false;
+        Repaint();
     }
+
     public boolean atTheEnd() {
         boolean stop = false;
         //初始化记录值
@@ -309,12 +310,11 @@ public class A extends JFrame implements KeyListener {
             }
         }
         Repaint();
-        Thread.sleep(time);
+        Thread.sleep(400);
     }
 
     //已优化，保证没有残影   含有Repaint()、时停sleep
     public void moveDown() throws InterruptedException {
-        System.out.printf("move down !~~" + lineCounter + " ]]");
 //        lineCounter = 0;
 //        for (int i : completeLine) lineCounter += i;
 
@@ -343,9 +343,9 @@ public class A extends JFrame implements KeyListener {
             lineCounter--;
         }
         Repaint();
-        Thread.sleep(time);
-
+        Thread.sleep(400);
     }
+
     //scoreProcess内包含成就7”一次性消除四行条件”,成就1、3、4、5（2000、4000、6000 须添加成就显示
     //可通过判别achievement内数据进行处理
     public void scoreProcess() {
@@ -374,7 +374,7 @@ public class A extends JFrame implements KeyListener {
             achievement[4] = 1;
             //成就提醒
         }
-        scoreField.setText(score + "");
+        scoreField.setText(score + " 方块数" + rectNumber);
     }
     public void tableProcess() {
         for (int i = 0; i < table.length - 1; i++) {
@@ -537,9 +537,6 @@ public class A extends JFrame implements KeyListener {
                 }
             }
         }
-        if (canGoLeft()) System.out.printf("CanGo~");
-        else System.out.printf("NO!!");
-        System.out.printf("A--");
         Repaint();
     }
 
@@ -579,7 +576,6 @@ public class A extends JFrame implements KeyListener {
             fall();
             Repaint();
         }
-        System.out.printf("GoDown~");
     }
 
 
@@ -726,7 +722,7 @@ public class A extends JFrame implements KeyListener {
         z2.add(z22);
     }
 
-    public void i() {
+    public void bar() {
         int[][] i1 = new int[4][4];
         i1[0][1] = 1;
         i1[1][1] = 1;
