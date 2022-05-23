@@ -39,6 +39,7 @@ public class A extends JFrame implements KeyListener {
     Font font1 = new Font("方正姚体",Font.PLAIN,20);
     Font font2 = new Font("Let's go Digital",Font.BOLD,20);
     Font font3 = new Font("黑体",Font.PLAIN,20);
+    int gameState = 0;
 
     ArrayList<int[][]> L = new ArrayList<>();
     ArrayList<int[][]> J = new ArrayList<>();
@@ -136,6 +137,7 @@ public class A extends JFrame implements KeyListener {
         time = 500;
         initialize();
         System.out.println("Tetris Go!");
+
         getRandomRect();
         recType_Achievement = rectType;
 
@@ -173,6 +175,7 @@ public class A extends JFrame implements KeyListener {
             tableProcess();//将colorNum + 4，改为对应颜色值 (2、3、4、5 对应 6、7、8、9）
             if (GameOver()) break;
             //方块产生并运动 触底即退出运动循环
+
             getRandomRect();
         }
         RePaintForGameOver();
@@ -185,6 +188,14 @@ public class A extends JFrame implements KeyListener {
         recordAchievement();
     }
 
+    public void gamePause(){
+        for (int i = 0; i < table.length; i++) {
+            for (int j = 0; j < table[0].length; j++) {
+
+            }
+
+        }
+    }
     //数据初始化
     public void initialize() throws FileNotFoundException {
         J();
@@ -220,30 +231,7 @@ public class A extends JFrame implements KeyListener {
         }
         sc.close();
 
-        KeyListener listener = new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent event) {
-                int code = event.getKeyCode();
-                switch (code) {
-                    case KeyEvent.VK_DOWN:
-                        goDown();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        goLeft();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        goRight();
-                        break;
-                    case KeyEvent.VK_SPACE://旋转方块，未完成
-                        rotate();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        this.addKeyListener(listener);
-        this.requestFocus();
+
     }
 
 
@@ -410,8 +398,10 @@ public class A extends JFrame implements KeyListener {
         for (int i = table.length - 2; i >= 0; i--) {//从下往上
             for (int j = 1; j < table[0].length - 1; j++) {
                 if (table[i][j] == color && i + 1 < table.length - 1) {
-                    table[i + 1][j] = table[i][j];
-                    table[i][j] = 0;
+                    if(gameState == 0){
+                        table[i + 1][j] = table[i][j];
+                        table[i][j] = 0;
+                    }
                 }
             }
         }
@@ -442,80 +432,79 @@ public class A extends JFrame implements KeyListener {
         return true;
     }
     public void rotate() {
-        int m, n;
-        m = 0;
-        n = 0;
-        //获取方块最下面那行的首个色块的位置
-        for (int i = 0; i < table.length-1; i++) {
-            for (int j = 1; j < table[0].length-1; j++) {
-                if(table[i][j] == color ) {
-                    m = i;
-                    n = j;
-                    break;
+        if(gameState == 0 ){
+            int m, n;
+            m = 0;
+            n = 0;
+            //获取方块最下面那行的首个色块的位置
+            for (int i = 0; i < table.length-1; i++) {
+                for (int j = 1; j < table[0].length-1; j++) {
+                    if(table[i][j] == color ) {
+                        m = i;
+                        n = j;
+                        break;
+                    }
                 }
             }
-        }
-        //从左下角到右上角，内循环为j 得出（3,0）的相对位置
-        if (rectType < 4) {
-            if (typeNumber == 1) m++;
-            else if (typeNumber == 2){
-                n--;
-            }else if (typeNumber == 3){
-                n-=2;
+            //从左下角到右上角，内循环为j 得出（3,0）的相对位置
+            if (rectType < 4) {
+                if (typeNumber == 1) m++;
+                else if (typeNumber == 2){
+                    n--;
+                }else if (typeNumber == 3){
+                    n-=2;
+                }
             }
-        }
-        else if (rectType < 8) {
-            if (typeNumber == 0 || typeNumber == 2) n--;
-            if (typeNumber == 3) m++;
-        }
-        else if (rectType < 12) {
+            else if (rectType < 8) {
+                if (typeNumber == 0 || typeNumber == 2) n--;
+                if (typeNumber == 3) m++;
+            }
+            else if (rectType < 12) {
                 if (typeNumber == 0) m++;
                 else n--;
             }
-        //z1
-        else if (rectType < 14) {
+            //z1
+            else if (rectType < 14) {
                 if (typeNumber == 0) {
                     n--;
                 }
                 else m++;
             }
-        //z2
-         else if (rectType < 16) {
-            if (typeNumber == 0) n = n - 1;
-            else{
-                m++;
-                n--;
-            }
-            //bar
-        } else if (rectType < 18) {
-            if (typeNumber == 0) n--;
-            if (typeNumber == 1) m++;
-        }
-
-
-        //扫除原有方块并将新方块绘制到table上
-        if(rectType != 18 && canRotate(m,n) ){
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                   if (table[m-3+i][j+n] == color) {
-                       table[m-3+i][j+n] = 0;
-                   }
+            //z2
+            else if (rectType < 16) {
+                if (typeNumber == 0) n = n - 1;
+                else{
+                    m++;
+                    n--;
                 }
+                //bar
+            } else if (rectType < 18) {
+                if (typeNumber == 0) n--;
+                if (typeNumber == 1) m++;
             }
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    if(temporaryRect[i][j] != 0) table[m-3+i][n+j] = color;
+            //扫除原有方块并将新方块绘制到table上
+            if(rectType != 18 && canRotate(m,n) ){
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        if (table[m-3+i][j+n] == color) {
+                            table[m-3+i][j+n] = 0;
+                        }
+                    }
                 }
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        if(temporaryRect[i][j] != 0) table[m-3+i][n+j] = color;
+                    }
+                }
+                Repaint();
             }
-            Repaint();
+            else {
+                //还原被更改的typeNumber
+                if(rectType == 18) typeNumber = 0;
+                else if(rectType >= 12 && rectType < 18)typeNumber =  (typeNumber-1)%2;
+                else typeNumber = (typeNumber-1)%4;
+            }
         }
-        else {
-            //还原被更改的typeNumber
-            if(rectType == 18) typeNumber = 0;
-            else if(rectType >= 12 && rectType < 18)typeNumber =  (typeNumber-1)%2;
-            else typeNumber = (typeNumber-1)%4;
-        }
-
     }
 
     public boolean canGoLeft() {
@@ -532,17 +521,19 @@ public class A extends JFrame implements KeyListener {
         return true;
     }
     public void goLeft() {
-        if (canGoLeft()) {
-            for (int i = table.length - 2; i >= 0; i--) {//左移 j-1
-                for (int j = 1; j < table[0].length - 1; j++) {
-                    if (table[i][j] == color && j > 1) {
-                        table[i][j - 1] = table[i][j];
-                        table[i][j] = 0;
+        if(gameState ==0){
+            if (canGoLeft()) {
+                for (int i = table.length - 2; i >= 0; i--) {//左移 j-1
+                    for (int j = 1; j < table[0].length - 1; j++) {
+                        if (table[i][j] == color && j > 1) {
+                            table[i][j - 1] = table[i][j];
+                            table[i][j] = 0;
+                        }
                     }
                 }
             }
+            Repaint();
         }
-        Repaint();
     }
     public boolean canGoRight(){
         for (int i = table.length - 2; i >= 0; i--) {
@@ -558,18 +549,19 @@ public class A extends JFrame implements KeyListener {
         return true;
     }
     public void goRight() {
-        if (canGoRight()) {
-            for (int i = table.length - 2; i >= 0; i--) {//右移 j+1
-                for (int j = table[0].length - 2; j > 0; j--) {
-                    if (table[i][j] == color) {
-                        table[i][j + 1] = table[i][j];
-                        table[i][j] = 0;
+        if(gameState == 0){
+            if (canGoRight()) {
+                for (int i = table.length - 2; i >= 0; i--) {//右移 j+1
+                    for (int j = table[0].length - 2; j > 0; j--) {
+                        if (table[i][j] == color) {
+                            table[i][j + 1] = table[i][j];
+                            table[i][j] = 0;
+                        }
                     }
                 }
+                Repaint();
             }
-            Repaint();
         }
-
     }
     public void goDown() {
         if(!atTheEnd()){
@@ -748,11 +740,47 @@ public class A extends JFrame implements KeyListener {
         squ1[2][2] = 1;
         O.add(squ1);
     }
-
+    public void pause(){
+        gameField.setText("Take a break~");
+        gameState = 1;
+    }
+    public void cont(){
+        gameField.setText("Good boy go~");
+        gameState = 0;
+    }
 
     //@Override
     public void keyTyped(KeyEvent e) {
-
+        KeyListener listener = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent event) {
+                int code = event.getKeyCode();
+                switch (code) {
+                    case KeyEvent.VK_DOWN:
+                        goDown();
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        goLeft();
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        goRight();
+                        break;
+                    case KeyEvent.VK_P:
+                        pause();
+                        break;
+                    case KeyEvent.VK_C:
+                        cont();
+                        break;
+                    case KeyEvent.VK_SPACE://旋转方块，未完成
+                        rotate();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        this.addKeyListener(listener);
+        this.requestFocus();
     }
 
     @Override
