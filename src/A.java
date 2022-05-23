@@ -1,22 +1,37 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+import java.util.Scanner;
+
+import static javax.swing.SwingConstants.CENTER;
 
 public class A extends JFrame implements KeyListener {
+    //TODO:MUSIC!!!!
     private static final int game_x = 21;
     private static final int game_y = 12;
     JTextArea[][] text;
     int[][] table;
+    int gameState = 1;
     JLabel label1,label2,label3;
     JTextField scoreField,gameField;
     JLabel hint1,hint2,hint3,hint4;
+    JLabel title;
+
+    JButton bu2,bu3,bu4;
+    JButton bu6,bu7,bu8;
+    JButton but1,but2,but3;
+    JButton[] achiBut;
+
+    JLabel lab3;
+    JButton but4,but5;
+
     int score = 0;
     //在游戏选档的时候用
     int time;
@@ -27,8 +42,11 @@ public class A extends JFrame implements KeyListener {
     int color;
     int[][] shape;
     //成就
+    ArrayList<Integer> scoreRank = new ArrayList<>();
     ArrayList<Integer> achievement = new ArrayList<>();
-    String[] achievementContent;
+    String[] achievementContent= new String[]{"The Best Planner",
+            "The Lucky Dog","Exceed Yourself","Go Great Gun",
+            "King Of Tetris","The Best Loser","Tetris Specialist"};
     int rectNumber = 0;//已获得方块数量
     int rectType;//定位方块类型
     int recType_Achievement;
@@ -37,21 +55,38 @@ public class A extends JFrame implements KeyListener {
     Font font1 = new Font("方正姚体",Font.PLAIN,20);
     Font font2 = new Font("Let's go Digital",Font.BOLD,20);
     Font font3 = new Font("黑体",Font.PLAIN,20);
-    int gameState = 0;
-    ArrayList<Integer> scoreRank = new ArrayList<>();
 
-    ArrayList<int[][]> L = new ArrayList<>();
-    ArrayList<int[][]> J = new ArrayList<>();
-    ArrayList<int[][]> T = new ArrayList<>();
-    ArrayList<int[][]> S = new ArrayList<>();
-    ArrayList<int[][]> Z = new ArrayList<>();
-    ArrayList<int[][]> I = new ArrayList<>();
-    ArrayList<int[][]> O = new ArrayList<>();
+    ArrayList<int[][]> rl = new ArrayList<>();
+    ArrayList<int[][]> ll = new ArrayList<>();
+    ArrayList<int[][]> t = new ArrayList<>();
+    ArrayList<int[][]> z1 = new ArrayList<>();
+    ArrayList<int[][]> z2 = new ArrayList<>();
+    ArrayList<int[][]> bar = new ArrayList<>();
+    ArrayList<int[][]> squ = new ArrayList<>();
     int[][] temporaryRect;
+
+    JPanel gameMain = new JPanel();
+    JPanel explain_le = new JPanel();
+    BeautifulPanel gameset = new BeautifulPanel();
+    boolean flag = true;
+
+    public void achievement(){
+        JFrame achi = new JFrame("ACHIEVEMENT");
+        achi.setSize(350,500);
+        achi.setLocationRelativeTo(null);
+        achi.setLayout(new GridLayout(7,1,3,3));
+        for (int i = 0; i < 7; i++) {
+            achi.add(new JButton(achievementContent[i]));
+        }
+
+        achi.setVisible(true);
+        achi.setResizable(false);
+        achi.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    }
 
     //游戏面板
     public void initWindow() {
-        this.setSize(600, 800);
+        this.setSize(600, 750);
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,7 +94,6 @@ public class A extends JFrame implements KeyListener {
         this.setTitle("Tetris Go~");
     }
     public void initGamePanel() {
-        JPanel gameMain = new JPanel();
         gameMain.setLayout(new GridLayout(game_x, game_y, 1, 1));
 
         for (int i = 0; i < text.length; i++) {
@@ -79,49 +113,275 @@ public class A extends JFrame implements KeyListener {
         this.add(gameMain, BorderLayout.CENTER);
     }
     public void initExplainPanel() {
-        JPanel explain_le = new JPanel();
         explain_le.setLayout(new GridLayout(12, 1));
         explain_le.setBackground(Color.white);
-        label1 = new JLabel("[游戏状态]",JLabel.CENTER);
-        label1.setFont(font3);
+        label1 = new JLabel("[STATUS]",JLabel.LEFT);
+        label1.setFont(font2);
 
-        gameField = new JTextField("游戏中!!!");
+        gameField = new JTextField("Good boy go~");
         gameField.setForeground(Color.blue);
         gameField.setEditable(false);
-        gameField.setFont(font3);
+        gameField.setFont(font2);
 
-        label3 = new JLabel("Your Score:",JLabel.LEFT);
+        label3 = new JLabel("[Your Score]",JLabel.LEFT);
         label3.setFont(font2);
 
-        scoreField = new JTextField(score + " NumOfRect: " + rectNumber);
+        scoreField = new JTextField("0");
         scoreField.setFont(font2);
         scoreField.setEditable(false);
 
-        hint1 = new JLabel("(←)向左移动",JLabel.CENTER);hint1.setFont(font3);hint1.setForeground(Color.BLUE);
-        hint2 = new JLabel("(→)向右移动",JLabel.CENTER);hint2.setFont(font3);hint2.setForeground(Color.BLUE);
-        hint3 = new JLabel("(↓)加速下落",JLabel.CENTER);hint3.setFont(font3);hint3.setForeground(Color.BLUE);
-        hint4 = new JLabel(" (Space)旋转方块 ",JLabel.CENTER);hint4.setFont(font3);hint4.setForeground(Color.BLUE);
+        but1 = new JButton("PAUSE");but1.setFont(font2);
+        but2 = new JButton("CONTINUE");but2.setFont(font2);
+        but3 = new JButton("EXIT");but3.setFont(font2);
+        but2.setEnabled(false);
+        but3.setEnabled(false);
+
+        hint1 = new JLabel("(←)LEFT", CENTER);hint1.setFont(font3);hint1.setForeground(Color.BLUE);
+        hint2 = new JLabel("(→)RIGHT", CENTER);hint2.setFont(font3);hint2.setForeground(Color.BLUE);
+        hint3 = new JLabel("(↓)DOWN", CENTER);hint3.setFont(font3);hint3.setForeground(Color.BLUE);
+        hint4 = new JLabel("  (Space)ROTATE  ", CENTER);hint4.setFont(font3);hint4.setForeground(Color.BLUE);
 
         explain_le.add(hint1);
         explain_le.add(hint2);
         explain_le.add(hint3);
         explain_le.add(hint4);
-        for (int i = 0; i < 1; i++) {
-            explain_le.add(new JLabel());
-        }
         explain_le.add(label1);
         explain_le.add(gameField);
         explain_le.add(label3);
         explain_le.add(scoreField);
+        explain_le.add(new JLabel());
+        explain_le.add(but1); explain_le.add(but2); explain_le.add(but3);
+
+        but1.addActionListener(new ActionListener() {//暂停键
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                but1.setEnabled(false);
+                but2.setEnabled(true);
+                but3.setEnabled(true);
+                gameState = 1;
+                gameField.setText("TAKE A BREAK ~");
+                gameField.setForeground(Color.RED);
+            }
+        });
+        but2.addActionListener(new ActionListener() {//继续键
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                but1.setEnabled(true);
+                but2.setEnabled(false);
+                but3.setEnabled(false);
+                gameState = 0;
+                gameField.setText("Good boy go ~");
+                gameField.setForeground(Color.BLUE);
+            }
+        });
+        but3.addActionListener(new ActionListener() {//退出键
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                savingHint();
+            }
+        });
 
         this.add(explain_le, BorderLayout.EAST);
     }
+    //主界面
+    public void initSet(){
+        gameset.setLayout(null);
+        title = new JLabel("HELLOTETRIS", CENTER); title.setBounds(0,80,600,100); title.setForeground(Color.WHITE);
+        title.setFont(new Font("Let's go Digital",Font.BOLD,80));
+        bu6 = new JButton("EASY"); bu6.setBounds(100,250,100,80); bu6.setFont(font2); bu6.setForeground(new Color(0,204,177));
+        bu7 = new JButton("NORMAL"); bu7.setBounds(250,250,100,80); bu7.setFont(font2); bu7.setForeground(new Color(107,155,210));
+        bu8 = new JButton("HARD"); bu8.setBounds(400,250,100,80); bu8.setFont(font2); bu8.setForeground(new Color(177,114,226));
+
+        bu2 = new JButton("LOAD"); bu2.setBounds(100,350,400,80); bu2.setFont(font2); bu2.setForeground(new Color(177,114,226));
+        bu3 = new JButton("ACHIEVEMENT"); bu3.setBounds(100,450,400,80); bu3.setFont(font2); bu3.setForeground(new Color(177,114,226));
+        bu4 = new JButton("EXIT"); bu4.setBounds(100,550,400,80); bu4.setFont(font2); bu4.setForeground(new Color(177,114,226));
+
+        bu2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        bu3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        bu4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        gameset.add(title);
+        gameset.add(bu6);
+        gameset.add(bu7);
+        gameset.add(bu8);
+        gameset.add(bu2);
+        gameset.add(bu3);
+        gameset.add(bu4);
+
+        //todo:读取难度和存档 并开始游戏
+        bu2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        //弹出成就界面
+        bu3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                achievement();
+            }
+        });
+        //退出游戏
+        bu4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        gameset.setVisible(true);
+        this.add(gameset, BorderLayout.CENTER);
+    }
+    //hint
+    public void savingHint(){
+        JDialog saving = new JDialog();
+        saving.setTitle("Remember to save your game~");
+        saving.setLayout(null);
+        saving.setLocationRelativeTo(null);
+        saving.setSize(300,200);
+        lab3 = new JLabel("Why not save? ", CENTER);
+        //lab3.setFont(font1);
+        lab3.setBounds(50,25,200,50);
+        but4 = new JButton("SAVE~");
+        but4.setBounds(25,100,100,50);
+        but5 = new JButton("NO!");
+        but5.setBounds(165,100,100,50);
+
+        saving.add(lab3);
+        saving.add(but4);
+        saving.add(but5);
+
+        but4.addActionListener(new ActionListener() {
+            //存档的老实人
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Save();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
+        but5.addActionListener(new ActionListener() {
+            //就不存档的狠人
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        saving.setVisible(true);
+        saving.setResizable(false);
+        saving.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+    }
+    public void over(){
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        JFrame gameOver = new JFrame("SAAAAAAAD!!!!");
+        gameOver.setSize(400,500);
+        gameOver.setLocationRelativeTo(null);
+        gameOver.setLayout(new GridLayout(6,1));
+        JLabel overing = new JLabel("GAMEOVER!!!", CENTER);
+        overing.setFont(new Font("Let's go Digital", Font.BOLD,30));
+        JLabel point = new JLabel("YOUR SCORE: " + score, CENTER);
+        point.setFont(font2);
+        point.setForeground(Color.BLUE);
+
+        JLabel RANKING = new JLabel("RANKING",CENTER);
+        JLabel RANKING1 = new JLabel("FIRST: "+ String.valueOf(scoreRank.get(3)),CENTER);
+        JLabel RANKING2 = new JLabel("SECOND: " +String.valueOf(scoreRank.get(2)),CENTER);
+        JLabel RANKING3 = new JLabel("THIRD: " +String.valueOf(scoreRank.get(1)),CENTER);
+        RANKING.setFont(font3); RANKING1.setFont(font3); RANKING2.setFont(font3); RANKING3.setFont(font3);
+
+        gameOver.add(overing);
+        gameOver.add(point);
+        gameOver.add(RANKING);
+        gameOver.add(RANKING1);
+        gameOver.add(RANKING2);
+        gameOver.add(RANKING3);
+
+        gameOver.setVisible(true);
+        gameOver.setResizable(false);
+        gameOver.setDefaultCloseOperation(EXIT_ON_CLOSE);
+    }
+    public void achiHint(int k){
+        JFrame achihint = new JFrame();
+        achihint.setBounds(1000,500,250,150);
+        achihint.setResizable(false);
+        achihint.setVisible(true);
+        achihint.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        achihint.setLayout(new GridLayout(2,1));
+        JLabel ac1 = new JLabel(achievementContent[k], CENTER);
+        JLabel ac2 = new JLabel("完成！", CENTER);
+        ac1.setFont(new Font("黑体", Font.PLAIN,17));
+        ac2.setFont(new Font("黑体", Font.PLAIN,15));
+        ac2.setForeground(Color.blue);
+        achihint.add(ac1);
+        achihint.add(ac2);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        achihint.setVisible(false);
+
+    }
+
+    public void getTime()throws IOException{
+        java.io.File file1 = new java.io.File("DIFFFICULTY.txt");
+        try {
+            PrintWriter output1 = new PrintWriter(file1);
+            output1.println(time);
+            output1.close();
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+    public void Save()throws IOException{
+        java.io.File file2 = new java.io.File("Data.txt");
+        PrintWriter output2 = new PrintWriter(file2);
+        for (int[] ints : table) {
+            for (int anInt : ints) {
+                output2.print(anInt + " ");
+            }
+            output2.print("\n");
+        }
+        output2.close();
+    }
+
+
     public A() {
         text = new JTextArea[game_x][game_y];
         table = new int[game_x][game_y];
 
-        initGamePanel();
-        initExplainPanel();
+//        initGamePanel();
+//        initExplainPanel();
+        initSet();
         initWindow();
     }
 
@@ -132,11 +392,69 @@ public class A extends JFrame implements KeyListener {
 
     //gameRun包含成就6
     public void gameRun() throws InterruptedException, IOException {
-        gameField.setText("Good boy go~");
-        time = 500;
-        initialize();
-        System.out.println("Tetris Go!");
+        flag = true;
+        bu6.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                time = 1000;
+                gameState = 0;
+                try {
+                    getTime();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                flag = false;
+                gameset.setVisible(false);
+                initGamePanel();
+                initExplainPanel();
+            }
+        });
+        bu7.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                time = 500;
+                gameState = 0;
+                try {
+                    getTime();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                flag = false;
+                gameset.setVisible(false);
+                initGamePanel();
+                initExplainPanel();
+            }
+        });
+        bu8.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                time = 250;
+                gameState = 0;
+                try {
+                    getTime();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                flag = false;
+                gameset.setVisible(false);
+                initGamePanel();
+                initExplainPanel();
+            }
+        });
 
+        //打开游戏界面后先不开始游戏进程 选择完难度后加载出游戏界面再开始游戏进程
+        if (flag) {
+            for (int i = -1000000; i < 1000000; i++) {
+                try {
+                    Thread.sleep(3000);
+                    if (!flag){break;}
+                    System.out.println(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        initialize();
         getRandomRect();
         recType_Achievement = rectType;
 
@@ -174,36 +492,34 @@ public class A extends JFrame implements KeyListener {
             tableProcess();//将colorNum + 4，改为对应颜色值 (2、3、4、5 对应 6、7、8、9）
             if (GameOver()) break;
             //方块产生并运动 触底即退出运动循环
-
             getRandomRect();
         }
         RePaintForGameOver();
         gameField.setText("Game over boy~");
-        //label1 = new JLabel("Good boy go~");
+        gameField.setForeground(Color.RED);
         if (rectNumber <= 6 && achievement.get(5) == 0) {
             achievementsJudge(5);
             //成就提醒
         }
+        recordAchievement();
         scoreRank.add(score);
         scoreRanking();
-        recordAchievement();
+        over();
     }
 
     //数据初始化
     public void initialize() throws FileNotFoundException {
-        J();
-        L();
-        T();
-        S();
-        Z();
-        I();
-        O();
+        ll();
+        rl();
+        t();
+        z1();
+        z2();
+        bar();
+        squ();
         completeLine = new int[table.length];
         score = 0;//分数
         //成就数据
-        achievementContent = new String[]{"获得不多于20个方块时分数达到1000",
-                "连续三次获得同一个方块","分数首次达到2000","分数首次达到4000",
-                "分数首次达到6000","游戏结束时获得了不多于6个方块","一次性消除四行"};
+
         rectNumber = 0;
 
         //获得方块所用的参数：
@@ -230,8 +546,8 @@ public class A extends JFrame implements KeyListener {
             scoreRank.add(scoreRead.nextInt());
         }
         scoreRead.close();
-    }
 
+    }
 
     //成就用到的方法
     public void achievementsJudge(int idNumber) {
@@ -247,6 +563,17 @@ public class A extends JFrame implements KeyListener {
         PrintWriter acWrite = new PrintWriter(ac);
         for(int i : achievement) acWrite.print(i + " ");
         acWrite.close();
+    }
+    public void scoreRanking() throws FileNotFoundException {
+        java.io.File sco = new java.io.File("scoreRank.txt");
+        PrintWriter scoWrite = new PrintWriter(sco);
+        Collections.sort(scoreRank);
+
+        for (int i = 3; i > 0; i--) {
+            scoWrite.print(scoreRank.get(i) + " ");
+        }
+        for(int i : scoreRank) System.out.printf(i + " ");
+        scoWrite.close();
     }
 
     //一些判断方法
@@ -282,16 +609,6 @@ public class A extends JFrame implements KeyListener {
         return isOver;
     }
 
-    public void scoreRanking() throws FileNotFoundException {
-        java.io.File sco = new java.io.File("scoreRank.txt");
-        PrintWriter scoWrite = new PrintWriter(sco);
-        Collections.sort(scoreRank);
-        for (int i =  4; i > 0; i--) {
-            scoWrite.print(scoreRank.get(i) + " ");
-        }
-        for(int i : scoreRank) System.out.printf(i + " ");
-        scoWrite.close();
-    }
     //方块触底后进行的操作
     public void record() {
         int count;
@@ -314,7 +631,7 @@ public class A extends JFrame implements KeyListener {
         for (int i = 0; i < table.length-1; i++) {
             if(completeLine[i] == 1){
                 for (int j = 1; j < table[0].length-1; j++) {
-                        table[i][j] = 0;
+                    table[i][j] = 0;
                 }
             }
         }
@@ -366,7 +683,7 @@ public class A extends JFrame implements KeyListener {
         if (score >= 2000 && achievement.get(2) == 0)achievementsJudge(2);
         if (score >= 4000 && achievement.get(3) == 0) achievementsJudge(3);
         if (score >= 6000 && achievement.get(4) == 0) achievementsJudge(4);
-        scoreField.setText(score + " NumOfRect: " + rectNumber);
+        scoreField.setText(score + "");
     }
     public void tableProcess() {
         for (int i = 0; i < table.length - 1; i++) {
@@ -375,7 +692,6 @@ public class A extends JFrame implements KeyListener {
             }
         }
     }
-
 
     public void Repaint(){
         for (int i = 0; i < table.length-1; i++){
@@ -394,10 +710,11 @@ public class A extends JFrame implements KeyListener {
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table[i].length; j++) {
                 if(table[i][j] != 0) {
-                    text[i][j].setBackground(new Color(178 - 6 * i,178 - 6 * i,178 - 6 * i));
+//                    text[i][j].setBackground(new Color(172,172,172));
+                    text[i][j].setBackground(new Color(178-(6*i),178-(6*i),178-(6*i)));
                 }
-                Thread.sleep(3);
             }
+            Thread.sleep(30);
         }
     }
 
@@ -405,8 +722,8 @@ public class A extends JFrame implements KeyListener {
     public void fall() {
         for (int i = table.length - 2; i >= 0; i--) {//从下往上
             for (int j = 1; j < table[0].length - 1; j++) {
-                if (table[i][j] == color && i + 1 < table.length - 1) {
-                    if(gameState == 0){
+                if (gameState == 0){
+                    if (table[i][j] == color && i + 1 < table.length - 1) {
                         table[i + 1][j] = table[i][j];
                         table[i][j] = 0;
                     }
@@ -418,21 +735,21 @@ public class A extends JFrame implements KeyListener {
         //获取对应方块
         if (rectType < 12){
             typeNumber = (typeNumber + 1) % 4;
-            if(rectType < 4) temporaryRect = J.get(typeNumber);
-            else if(rectType < 8) temporaryRect = L.get(typeNumber);
-            else temporaryRect = T.get(typeNumber);
+            if(rectType < 4) temporaryRect = ll.get(typeNumber);
+            else if(rectType < 8) temporaryRect = rl.get(typeNumber);
+            else temporaryRect = t.get(typeNumber);
         } else if (rectType < 18){
             typeNumber = (typeNumber + 1) % 2;
-            if(rectType < 14) temporaryRect = S.get(typeNumber);
-            else if(rectType < 16) temporaryRect = Z.get(typeNumber);
-            else temporaryRect = I.get(typeNumber);
-        } else temporaryRect = O.get(0);
+            if(rectType < 14) temporaryRect = z1.get(typeNumber);
+            else if(rectType < 16) temporaryRect = z2.get(typeNumber);
+            else temporaryRect = bar.get(typeNumber);
+        } else temporaryRect = squ.get(0);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if(temporaryRect[i][j] != 0){
                     //判断目标方块的有色区域 如果进入table是否越界
                     if( !(m-3+i >= 0 && m-3+i < table.length-1 && n+j >=1 && n + j < table[0].length-1)) return false;
-                    //如果没有越界，判断 目标方块的有色区域 是否和table已经堆叠的方块重叠
+                        //如果没有越界，判断 目标方块的有色区域 是否和table已经堆叠的方块重叠
                     else if (table[m-3+i][j+n] != 0 && table[m-3+i][j+n] != color) return false;
                 }
             }
@@ -440,14 +757,14 @@ public class A extends JFrame implements KeyListener {
         return true;
     }
     public void rotate() {
-        if(gameState == 0 ){
+        if (gameState == 0) {
             int m, n;
             m = 0;
             n = 0;
             //获取方块最下面那行的首个色块的位置
-            for (int i = 0; i < table.length-1; i++) {
-                for (int j = 1; j < table[0].length-1; j++) {
-                    if(table[i][j] == color ) {
+            for (int i = 0; i < table.length - 1; i++) {
+                for (int j = 1; j < table[0].length - 1; j++) {
+                    if (table[i][j] == color) {
                         m = i;
                         n = j;
                         break;
@@ -457,17 +774,15 @@ public class A extends JFrame implements KeyListener {
             //从左下角到右上角，内循环为j 得出（3,0）的相对位置
             if (rectType < 4) {
                 if (typeNumber == 1) m++;
-                else if (typeNumber == 2){
+                else if (typeNumber == 2) {
                     n--;
-                }else if (typeNumber == 3){
-                    n-=2;
+                } else if (typeNumber == 3) {
+                    n -= 2;
                 }
-            }
-            else if (rectType < 8) {
+            } else if (rectType < 8) {
                 if (typeNumber == 0 || typeNumber == 2) n--;
                 if (typeNumber == 3) m++;
-            }
-            else if (rectType < 12) {
+            } else if (rectType < 12) {
                 if (typeNumber == 0) m++;
                 else n--;
             }
@@ -475,13 +790,12 @@ public class A extends JFrame implements KeyListener {
             else if (rectType < 14) {
                 if (typeNumber == 0) {
                     n--;
-                }
-                else m++;
+                } else m++;
             }
             //z2
             else if (rectType < 16) {
                 if (typeNumber == 0) n = n - 1;
-                else{
+                else {
                     m++;
                     n--;
                 }
@@ -490,36 +804,39 @@ public class A extends JFrame implements KeyListener {
                 if (typeNumber == 0) n--;
                 if (typeNumber == 1) m++;
             }
+
+
             //扫除原有方块并将新方块绘制到table上
-            if(rectType != 18 && canRotate(m,n) ){
+            if (rectType != 18 && canRotate(m, n)) {
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
-                        if (table[m-3+i][j+n] == color) {
-                            table[m-3+i][j+n] = 0;
+                        if (table[m - 3 + i][j + n] == color) {
+                            table[m - 3 + i][j + n] = 0;
                         }
                     }
                 }
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
-                        if(temporaryRect[i][j] != 0) table[m-3+i][n+j] = color;
+                        if (temporaryRect[i][j] != 0) table[m - 3 + i][n + j] = color;
                     }
                 }
                 Repaint();
-            }
-            else {
+            } else {
                 //还原被更改的typeNumber
-                if(rectType == 18) typeNumber = 0;
-                else if(rectType >= 12 && rectType < 18)typeNumber =  (typeNumber-1)%2;
-                else typeNumber = (typeNumber-1)%4;
+                if (rectType == 18) typeNumber = 0;
+                else if (rectType >= 12 && rectType < 18) typeNumber = (typeNumber - 1) % 2;
+                else typeNumber = (typeNumber - 1) % 4;
             }
         }
     }
-
     public boolean canGoLeft() {
         for (int i = 0; i < table.length - 1; i++) {//从左到右扫描，一旦有撞墙或撞方块，canGoLeft → false
-            for (int j = 0; j < table[0].length - 1; j++) {
+            for (int j = 1; j < table[0].length - 1; j++) {
                 if (table[i][j] == color){
-                    if (table[i][j] == color && j >= 1 && table[i][j - 1] != 0) {
+                    if (table[i][j] == color && j == 1) {
+                        return false;//撞墙
+                    }
+                    if (table[i][j] == color && j > 1 && table[i][j - 1] != 0) {
                         return false;//撞方块
                     }
                     break;
@@ -529,7 +846,7 @@ public class A extends JFrame implements KeyListener {
         return true;
     }
     public void goLeft() {
-        if(gameState ==0){
+        if (gameState == 0) {
             if (canGoLeft()) {
                 for (int i = table.length - 2; i >= 0; i--) {//左移 j-1
                     for (int j = 1; j < table[0].length - 1; j++) {
@@ -547,8 +864,11 @@ public class A extends JFrame implements KeyListener {
         for (int i = table.length - 2; i >= 0; i--) {
             for (int j = table[0].length - 2; j > 0; j--) {
                 if(table[i][j] == color) {
-                    if (table[i][j] == color && j < table[0].length - 1 && table[i][j + 1] != 0) {
-                        return false;//撞墙或者方块
+                    if (table[i][j] == color && j == table[0].length - 2) {
+                        return false;//撞墙
+                    }
+                    if (table[i][j] == color && j < table[0].length - 2 && table[i][j + 1] != 0) {
+                        return false;//撞方块
                     }
                     break;
                 }
@@ -557,7 +877,7 @@ public class A extends JFrame implements KeyListener {
         return true;
     }
     public void goRight() {
-        if(gameState == 0){
+        if (gameState == 0) {
             if (canGoRight()) {
                 for (int i = table.length - 2; i >= 0; i--) {//右移 j+1
                     for (int j = table[0].length - 2; j > 0; j--) {
@@ -584,216 +904,195 @@ public class A extends JFrame implements KeyListener {
         rectType = rand.nextInt(19);
         if (rectType < 4) {
             typeNumber = rand.nextInt(4);
-            shape = J.get(typeNumber);
+            shape = ll.get(typeNumber);
         } else if (rectType < 8) {
             typeNumber = rand.nextInt(4);
-            shape = L.get(typeNumber);
+            shape = rl.get(typeNumber);
         } else if (rectType < 12) {
             typeNumber = rand.nextInt(4);
-            shape = T.get(typeNumber);
+            shape = t.get(typeNumber);
         } else if (rectType < 14) {
             typeNumber = rand.nextInt(2);
-            shape = S.get(typeNumber);
+            shape = z1.get(typeNumber);
         } else if (rectType < 16) {
             typeNumber = rand.nextInt(2);
-            shape = Z.get(typeNumber);
+            shape = z2.get(typeNumber);
         } else if (rectType < 18) {
             typeNumber = rand.nextInt(2);
-            shape = I.get(typeNumber);
+            shape = bar.get(typeNumber);
         } else {
-            shape = O.get(0);
+            shape = squ.get(0);
         }
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (shape[i][j] == 1) {
                     table[i][j + 4] = color;//将初始色改为color编号；
-                }
+                }                      //以上完成方块种类以及颜色的随机生成
             }
         }
         Repaint();
     }
-    public void J() {
+    public void ll() {
         int[][] ll1 = new int[4][4];
         ll1[1][1] = 1;
         ll1[2][1] = 1;
         ll1[3][1] = 1;
         ll1[3][0] = 1;
-        J.add(ll1);
+        ll.add(ll1);
 
         int[][] ll2 = new int[4][4];
         ll2[1][0] = 1;
         ll2[2][0] = 1;
         ll2[2][1] = 1;
         ll2[2][2] = 1;
-        J.add(ll2);
+        ll.add(ll2);
 
         int[][] ll3 = new int[4][4];
         ll3[1][2] = 1;
         ll3[1][1] = 1;
         ll3[2][1] = 1;
         ll3[3][1] = 1;
-        J.add(ll3);
+        ll.add(ll3);
 
         int[][] ll4 = new int[4][4];
         ll4[2][0] = 1;
         ll4[2][1] = 1;
         ll4[2][2] = 1;
         ll4[3][2] = 1;
-        J.add(ll4);
+        ll.add(ll4);
 
     }
-    public void L() {
+    public void rl() {
         int[][] l1 = new int[4][4];
         l1[1][1] = 1;
         l1[2][1] = 1;
         l1[3][1] = 1;
         l1[3][2] = 1;
-        L.add(l1);
+        rl.add(l1);
 
         int[][] l2 = new int[4][4];
         l2[3][0] = 1;
         l2[2][0] = 1;
         l2[2][1] = 1;
         l2[2][2] = 1;
-        L.add(l2);
+        rl.add(l2);
 
         int[][] l3 = new int[4][4];
         l3[1][0] = 1;
         l3[1][1] = 1;
         l3[2][1] = 1;
         l3[3][1] = 1;
-        L.add(l3);
+        rl.add(l3);
 
         int[][] l4 = new int[4][4];
         l4[2][0] = 1;
         l4[2][1] = 1;
         l4[2][2] = 1;
         l4[1][2] = 1;
-        L.add(l4);
+        rl.add(l4);
 
     }
-    public void T() {
+    public void t() {
         int[][] t1 = new int[4][4];
         t1[1][1] = 1;
         t1[2][0] = 1;
         t1[2][1] = 1;
         t1[2][2] = 1;
-        T.add(t1);
+        t.add(t1);
         int[][] t2 = new int[4][4];
         t2[1][1] = 1;
         t2[2][1] = 1;
         t2[3][1] = 1;
         t2[2][2] = 1;
-        T.add(t2);
+        t.add(t2);
         int[][] t3 = new int[4][4];
         t3[2][0] = 1;
         t3[2][1] = 1;
         t3[2][2] = 1;
         t3[3][1] = 1;
-        T.add(t3);
+        t.add(t3);
         int[][] t4 = new int[4][4];
         t4[1][1] = 1;
         t4[2][1] = 1;
         t4[3][1] = 1;
         t4[2][0] = 1;
-        T.add(t4);
+        t.add(t4);
     }
-    public void S() {
+    public void z1() {
         int[][] z11 = new int[4][4];
         z11[1][0] = 1;
         z11[2][0] = 1;
         z11[2][1] = 1;
         z11[3][1] = 1;
-        S.add(z11);
+        z1.add(z11);
         int[][] z12 = new int[4][4];
         z12[1][1] = 1;
         z12[1][2] = 1;
         z12[2][0] = 1;
         z12[2][1] = 1;
-        S.add(z12);
+        z1.add(z12);
     }
-    public void Z() {
+    public void z2() {
         int[][] z21 = new int[4][4];
         z21[1][2] = 1;
         z21[2][2] = 1;
         z21[2][1] = 1;
         z21[3][1] = 1;
-        Z.add(z21);
+        z2.add(z21);
         int[][] z22 = new int[4][4];
         z22[1][0] = 1;
         z22[1][1] = 1;
         z22[2][1] = 1;
         z22[2][2] = 1;
-        Z.add(z22);
+        z2.add(z22);
     }
-    public void I() {
+    public void bar() {
         int[][] i1 = new int[4][4];
         i1[0][1] = 1;
         i1[1][1] = 1;
         i1[2][1] = 1;
         i1[3][1] = 1;
-        I.add(i1);
+        bar.add(i1);
         int[][] i2 = new int[4][4];
         i2[2][0] = 1;
         i2[2][1] = 1;
         i2[2][2] = 1;
         i2[2][3] = 1;
-        I.add(i2);
+        bar.add(i2);
     }
-    public void O() {
+    public void squ() {
         int[][] squ1 = new int[4][4];
         squ1[1][1] = 1;
         squ1[1][2] = 1;
         squ1[2][1] = 1;
         squ1[2][2] = 1;
-        O.add(squ1);
-    }
-    public void pause(){
-        gameField.setText("Take a break~");
-        gameState = 1;
-    }
-    public void cont(){
-        gameField.setText("Good boy go~");
-        gameState = 0;
+        squ.add(squ1);
     }
 
-    //@Override
+    @Override
     public void keyTyped(KeyEvent e) {
-        KeyListener listener = new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent event) {
-                int code = event.getKeyCode();
-                switch (code) {
-                    case KeyEvent.VK_DOWN:
-                        goDown();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        goLeft();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        goRight();
-                        break;
-                    case KeyEvent.VK_P:
-                        pause();
-                        break;
-                    case KeyEvent.VK_C:
-                        cont();
-                        break;
-                    case KeyEvent.VK_SPACE://旋转方块，未完成
-                        rotate();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        this.addKeyListener(listener);
-        this.requestFocus();
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-
+        int code = e.getKeyCode();
+        switch (code) {
+            case KeyEvent.VK_DOWN:
+                goDown();
+                break;
+            case KeyEvent.VK_LEFT:
+                goLeft();
+                break;
+            case KeyEvent.VK_RIGHT:
+                goRight();
+                break;
+            case KeyEvent.VK_SPACE://旋转方块，未完成
+                rotate();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
