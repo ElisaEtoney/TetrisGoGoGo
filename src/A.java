@@ -20,6 +20,7 @@ public class A extends JFrame implements KeyListener {
     JTextField scoreField,gameField;
     JLabel hint1,hint2,hint3,hint4;
     int score = 0;
+    //在游戏选档的时候用
     int time;
 
     int[] completeLine;
@@ -48,7 +49,7 @@ public class A extends JFrame implements KeyListener {
     ArrayList<int[][]> squ = new ArrayList<>();
     int[][] temporaryRect;
 
-
+    //游戏面板
     public void initWindow() {
         this.setSize(600, 800);
         this.setVisible(true);
@@ -57,7 +58,6 @@ public class A extends JFrame implements KeyListener {
         this.setResizable(false);
         this.setTitle("Tetris Go~");
     }
-
     public void initGamePanel() {
         JPanel gameMain = new JPanel();
         gameMain.setLayout(new GridLayout(game_x, game_y, 1, 1));
@@ -78,8 +78,6 @@ public class A extends JFrame implements KeyListener {
         this.setLayout(new BorderLayout(1,1));
         this.add(gameMain, BorderLayout.CENTER);
     }
-
-    //5
     public void initExplainPanel() {
         JPanel explain_le = new JPanel();
         explain_le.setLayout(new GridLayout(12, 1));
@@ -118,7 +116,6 @@ public class A extends JFrame implements KeyListener {
 
         this.add(explain_le, BorderLayout.EAST);
     }
-
     public A() {
         text = new JTextArea[game_x][game_y];
         table = new int[game_x][game_y];
@@ -135,11 +132,9 @@ public class A extends JFrame implements KeyListener {
 
     //gameRun包含成就6
     public void gameRun() throws InterruptedException, IOException {
-        time = 700;
+        time = 500;
         initialize();
         System.out.println("Tetris Go!");
-        //游戏开始，结束时退出循环
-
         getRandomRect();
         recType_Achievement = rectType;
 
@@ -158,7 +153,7 @@ public class A extends JFrame implements KeyListener {
                     fall();
                     //时间间隔
                     Repaint();
-                    Thread.sleep(500);
+                    Thread.sleep(time);
                     //自动下移
                 } else break;
             }
@@ -187,8 +182,7 @@ public class A extends JFrame implements KeyListener {
         recordAchievement();
     }
 
-
-
+    //数据初始化
     public void initialize() throws FileNotFoundException {
         ll();
         rl();
@@ -248,20 +242,9 @@ public class A extends JFrame implements KeyListener {
         this.addKeyListener(listener);
         this.requestFocus();
     }
-    public void getRandomRect(){
-        color = rand.nextInt(4) + 2;
-        rectType = rand.nextInt(19);
-        shape = getRect();//获取随机的一个方块
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (shape[i][j] == 1) {
-                    table[i][j + 4] = color;//将初始色改为color编号；
-                }                      //以上完成方块种类以及颜色的随机生成
-            }
-        }
-        Repaint();
-    }
 
+
+    //成就用到的方法
     public void achievementsJudge(int idNumber)throws IOException {
         if(achievement.get(idNumber) == 0){
             achievement.set(idNumber,1);
@@ -269,13 +252,14 @@ public class A extends JFrame implements KeyListener {
         }
 
     }
-
     public void recordAchievement() throws FileNotFoundException {
         java.io.File file2 = new java.io.File("achievementNumber.txt");
         PrintWriter output = new PrintWriter(file2);
         for(double i : achievement) output.print(i + " ");
         output.close();
     }
+
+    //一些判断方法
     public boolean atTheEnd() {
         boolean stop = false;
         //初始化记录值
@@ -307,6 +291,8 @@ public class A extends JFrame implements KeyListener {
         }
         return isOver;
     }
+
+    //方块触底后进行的操作
     public void record() {
         int count;
         lineCounter=0;
@@ -324,8 +310,6 @@ public class A extends JFrame implements KeyListener {
             }
         }
     }
-
-    //含有Repaint()
     public void erasure() throws InterruptedException {//暂不改 可以简化
         for (int i = 0; i < table.length-1; i++) {
             if(completeLine[i] == 1){
@@ -337,7 +321,6 @@ public class A extends JFrame implements KeyListener {
         Repaint();
         Thread.sleep(300);
     }
-    //已优化，保证没有残影   含有Repaint()、时停sleep
     public void moveDown() throws InterruptedException {
 //        lineCounter = 0;
 //        for (int i : completeLine) lineCounter += i;
@@ -369,9 +352,7 @@ public class A extends JFrame implements KeyListener {
         Repaint();
         Thread.sleep(300);
     }
-
     //scoreProcess内包含成就7”一次性消除四行条件”,成就1、3、4、5（2000、4000、6000 须添加成就显示
-    //可通过判别achievement内数据进行处理
     public void scoreProcess() throws IOException {
         //当前score处理，加分
         if (lineCounter == 1) score += 40;
@@ -395,7 +376,8 @@ public class A extends JFrame implements KeyListener {
         }
     }
 
-        public void Repaint(){
+
+    public void Repaint(){
         for (int i = 0; i < table.length-1; i++){
             for (int j = 1; j < table[i].length-1; j++){
                 if(table[i][j] == 2 || table[i][j] == 6) text[i][j].setBackground(new Color(177,114,226));
@@ -406,6 +388,8 @@ public class A extends JFrame implements KeyListener {
             }
         }
     }
+
+    //运动类方法及其判定
     public void fall() {
         for (int i = table.length - 2; i >= 0; i--) {//从下往上
             for (int j = 1; j < table[0].length - 1; j++) {
@@ -416,7 +400,6 @@ public class A extends JFrame implements KeyListener {
             }
         }
     }
-
     public boolean canRotate(int m , int n) {
         //获取对应方块
         if (rectType < 12){
@@ -442,7 +425,6 @@ public class A extends JFrame implements KeyListener {
         }
         return true;
     }
-
     public void rotate() {
         int m, n;
         m = 0;
@@ -519,7 +501,6 @@ public class A extends JFrame implements KeyListener {
         }
 
     }
-
     public boolean canGoLeft() {
         for (int i = 0; i < table.length - 1; i++) {//从左到右扫描，一旦有撞墙或撞方块，canGoLeft → false
             for (int j = 1; j < table[0].length - 1; j++) {
@@ -549,7 +530,6 @@ public class A extends JFrame implements KeyListener {
         }
         Repaint();
     }
-
     public boolean canGoRight(){
         for (int i = table.length - 2; i >= 0; i--) {
             for (int j = table[0].length - 2; j > 0; j--) {
@@ -580,7 +560,6 @@ public class A extends JFrame implements KeyListener {
         }
 
     }
-
     public void goDown() {
         if(!atTheEnd()){
             fall();
@@ -588,30 +567,40 @@ public class A extends JFrame implements KeyListener {
         }
     }
 
-    public int[][] getRect() {
+    //方块初始化和获得随机方块
+    public void getRandomRect() {
+        color = rand.nextInt(4) + 2;
+        rectType = rand.nextInt(19);
         if (rectType < 4) {
             typeNumber = rand.nextInt(4);
-            return ll.get(typeNumber);
+            shape = ll.get(typeNumber);
         } else if (rectType < 8) {
             typeNumber = rand.nextInt(4);
-            return rl.get(typeNumber);
+            shape = rl.get(typeNumber);
         } else if (rectType < 12) {
             typeNumber = rand.nextInt(4);
-            return t.get(typeNumber);
+            shape = t.get(typeNumber);
         } else if (rectType < 14) {
             typeNumber = rand.nextInt(2);
-            return z1.get(typeNumber);
+            shape = z1.get(typeNumber);
         } else if (rectType < 16) {
             typeNumber = rand.nextInt(2);
-            return z2.get(typeNumber);
+            shape = z2.get(typeNumber);
         } else if (rectType < 18) {
             typeNumber = rand.nextInt(2);
-            return bar.get(typeNumber);
+            shape = bar.get(typeNumber);
         } else {
-            return squ.get(0);
+            shape = squ.get(0);
         }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (shape[i][j] == 1) {
+                    table[i][j + 4] = color;//将初始色改为color编号；
+                }                      //以上完成方块种类以及颜色的随机生成
+            }
+        }
+        Repaint();
     }
-
     public void ll() {
         int[][] ll1 = new int[4][4];
         ll1[1][1] = 1;
@@ -642,7 +631,6 @@ public class A extends JFrame implements KeyListener {
         ll.add(ll4);
 
     }
-
     public void rl() {
         int[][] l1 = new int[4][4];
         l1[1][1] = 1;
@@ -673,7 +661,6 @@ public class A extends JFrame implements KeyListener {
         rl.add(l4);
 
     }
-
     public void t() {
         int[][] t1 = new int[4][4];
         t1[1][1] = 1;
@@ -700,7 +687,6 @@ public class A extends JFrame implements KeyListener {
         t4[2][0] = 1;
         t.add(t4);
     }
-
     public void z1() {
         int[][] z11 = new int[4][4];
         z11[1][0] = 1;
@@ -715,7 +701,6 @@ public class A extends JFrame implements KeyListener {
         z12[2][1] = 1;
         z1.add(z12);
     }
-
     public void z2() {
         int[][] z21 = new int[4][4];
         z21[1][2] = 1;
@@ -730,7 +715,6 @@ public class A extends JFrame implements KeyListener {
         z22[2][2] = 1;
         z2.add(z22);
     }
-
     public void bar() {
         int[][] i1 = new int[4][4];
         i1[0][1] = 1;
@@ -753,8 +737,6 @@ public class A extends JFrame implements KeyListener {
         squ1[2][2] = 1;
         squ.add(squ1);
     }
-
-
 
 
     //@Override
