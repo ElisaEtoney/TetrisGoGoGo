@@ -3,8 +3,13 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 public class A extends JFrame implements KeyListener {
     private static final int game_x = 21;
@@ -23,7 +28,7 @@ public class A extends JFrame implements KeyListener {
     int color;
     int[][] shape;
     //成就
-    int[] achievement;
+    ArrayList<Integer> achievement = new ArrayList<>();
     String[] achievementContent;
     int rectNumber = 0;//已获得方块数量
     int rectType;//定位方块类型
@@ -31,7 +36,7 @@ public class A extends JFrame implements KeyListener {
     int theSameRecType_Achievement;
     int typeNumber;
     Font font1 = new Font("方正姚体",Font.PLAIN,20);
-    Font font2 = new Font("Let's go Digital",Font.BOLD,30);
+    Font font2 = new Font("Let's go Digital",Font.BOLD,20);
     Font font3 = new Font("黑体",Font.PLAIN,20);
 
     ArrayList<int[][]> rl = new ArrayList<>();
@@ -90,7 +95,7 @@ public class A extends JFrame implements KeyListener {
         label3 = new JLabel("Your Score:",JLabel.LEFT);
         label3.setFont(font2);
 
-        scoreField = new JTextField(score + " 方块数量" + rectNumber);
+        scoreField = new JTextField(score + " NumOfRect: " + rectNumber);
         scoreField.setFont(font2);
         scoreField.setEditable(false);
 
@@ -123,38 +128,37 @@ public class A extends JFrame implements KeyListener {
         initWindow();
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         A tetris1 = new A();
         tetris1.gameRun();
     }
 
     //gameRun包含成就6
-    public void gameRun() throws InterruptedException {
+    public void gameRun() throws InterruptedException, IOException {
         time = 700;
         initialize();
-        System.out.println("Go!");
+        System.out.println("Tetris Go!");
         //游戏开始，结束时退出循环
-
 
         getRandomRect();
         recType_Achievement = rectType;
 
         while (true) {
+            //判定成就2
             if(recType_Achievement  == rectType){
                 theSameRecType_Achievement++;
-            }
-            else{
+            } else{
                 recType_Achievement = 0;
                 theSameRecType_Achievement = 0;
             }
-            if(theSameRecType_Achievement == 3 ) System.out.printf("The lucky dog!!");
+            if(theSameRecType_Achievement == 3 ) achievementsJudge(1);
 
             while (true) {//方块移动 触底时退出
                 if (!atTheEnd() ) {
                     fall();
                     //时间间隔
                     Repaint();
-                    Thread.sleep(600);
+                    Thread.sleep(500);
                     //自动下移
                 } else break;
             }
@@ -176,15 +180,16 @@ public class A extends JFrame implements KeyListener {
             getRandomRect();
         }
         label1 = new JLabel("Good boy go~");
-        if (rectNumber <= 6 && achievement[5] == 0) {
-            achievement[5] = 1;
+        if (rectNumber <= 6 && achievement.get(5) == 0) {
+            achievementsJudge(5);
             //成就提醒
         }
+        recordAchievement();
     }
 
 
 
-    public void initialize(){
+    public void initialize() throws FileNotFoundException {
         ll();
         rl();
         t();
@@ -195,9 +200,9 @@ public class A extends JFrame implements KeyListener {
         completeLine = new int[table.length];
         score = 0;//分数
         //成就数据
-        achievement = new int[7];
-        achievementContent = new String[7];
-        achievementContent[0] = "获得1000分且获得方块不多于50";
+        achievementContent = new String[]{"获得不多于20个方块时分数达到1000",
+                "连续三次获得同一个方块","分数首次达到2000","分数首次达到4000",
+                "分数首次达到6000","游戏结束时获得了不多于6个方块","一次性消除四行"};
         rectNumber = 0;
 
         //获得方块所用的参数：
@@ -210,6 +215,13 @@ public class A extends JFrame implements KeyListener {
                 table[i][j] = 0;
             }
         }
+        //读取成就
+        File file1 = new File("achievement.txt");
+        Scanner sc = new Scanner(file1);
+        while (sc.hasNext()){
+            achievement.add(sc.nextInt());
+        }
+        sc.close();
 
         KeyListener listener = new KeyAdapter() {
             @Override
@@ -236,7 +248,6 @@ public class A extends JFrame implements KeyListener {
         this.addKeyListener(listener);
         this.requestFocus();
     }
-
     public void getRandomRect(){
         color = rand.nextInt(4) + 2;
         rectType = rand.nextInt(19);
@@ -251,6 +262,20 @@ public class A extends JFrame implements KeyListener {
         Repaint();
     }
 
+    public void achievementsJudge(int idNumber)throws IOException {
+        if(achievement.get(idNumber) == 0){
+            achievement.set(idNumber,1);
+            //且对应成就提醒
+        }
+
+    }
+
+    public void recordAchievement() throws FileNotFoundException {
+        java.io.File file2 = new java.io.File("achievementNumber.txt");
+        PrintWriter output = new PrintWriter(file2);
+        for(double i : achievement) output.print(i + " ");
+        output.close();
+    }
     public boolean atTheEnd() {
         boolean stop = false;
         //初始化记录值
@@ -310,9 +335,8 @@ public class A extends JFrame implements KeyListener {
             }
         }
         Repaint();
-        Thread.sleep(400);
+        Thread.sleep(300);
     }
-
     //已优化，保证没有残影   含有Repaint()、时停sleep
     public void moveDown() throws InterruptedException {
 //        lineCounter = 0;
@@ -343,38 +367,25 @@ public class A extends JFrame implements KeyListener {
             lineCounter--;
         }
         Repaint();
-        Thread.sleep(400);
+        Thread.sleep(300);
     }
 
     //scoreProcess内包含成就7”一次性消除四行条件”,成就1、3、4、5（2000、4000、6000 须添加成就显示
     //可通过判别achievement内数据进行处理
-    public void scoreProcess() {
+    public void scoreProcess() throws IOException {
         //当前score处理，加分
         if (lineCounter == 1) score += 40;
         if (lineCounter == 2) score += 100;
         if (lineCounter == 3) score += 500;
         if (lineCounter == 4) {
             score += 1000;
-            if (achievement[6] == 0) achievement[6] = 1;
-            //成就提醒
+            if (achievement.get(6) == 0) achievementsJudge(6);
         }
-        if (score >= 1000 && rectNumber <= 50 && achievement[0] == 0) {
-            achievement[0] = 1;
-            //成就提醒
-        }
-        if (score >= 2000 && achievement[2] == 0) {
-            achievement[2] = 1;
-            //成就提醒
-        }
-        if (score >= 4000 && achievement[3] == 0) {
-            achievement[3] = 1;
-            //成就提醒
-        }
-        if (score >= 2000 && achievement[4] == 0) {
-            achievement[4] = 1;
-            //成就提醒
-        }
-        scoreField.setText(score + " 方块数" + rectNumber);
+        if (score >= 1000 && rectNumber <= 50 && achievement.get(0) == 0) achievementsJudge(0);
+        if (score >= 2000 && achievement.get(2) == 0)achievementsJudge(2);
+        if (score >= 4000 && achievement.get(3) == 0) achievementsJudge(3);
+        if (score >= 6000 && achievement.get(4) == 0) achievementsJudge(4);
+        scoreField.setText(score + " NumOfRect: " + rectNumber);
     }
     public void tableProcess() {
         for (int i = 0; i < table.length - 1; i++) {
@@ -382,7 +393,6 @@ public class A extends JFrame implements KeyListener {
                 if (table[i][j] < 6 && table[i][j] >= 2) table[i][j] = table[i][j] + 4;
             }
         }
-        System.out.println("Processed");
     }
 
         public void Repaint(){
@@ -577,7 +587,6 @@ public class A extends JFrame implements KeyListener {
             Repaint();
         }
     }
-
 
     public int[][] getRect() {
         if (rectType < 4) {
