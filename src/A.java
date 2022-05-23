@@ -40,13 +40,13 @@ public class A extends JFrame implements KeyListener {
     Font font2 = new Font("Let's go Digital",Font.BOLD,20);
     Font font3 = new Font("黑体",Font.PLAIN,20);
 
-    ArrayList<int[][]> rl = new ArrayList<>();
-    ArrayList<int[][]> ll = new ArrayList<>();
-    ArrayList<int[][]> t = new ArrayList<>();
-    ArrayList<int[][]> z1 = new ArrayList<>();
-    ArrayList<int[][]> z2 = new ArrayList<>();
-    ArrayList<int[][]> bar = new ArrayList<>();
-    ArrayList<int[][]> squ = new ArrayList<>();
+    ArrayList<int[][]> L = new ArrayList<>();
+    ArrayList<int[][]> J = new ArrayList<>();
+    ArrayList<int[][]> T = new ArrayList<>();
+    ArrayList<int[][]> S = new ArrayList<>();
+    ArrayList<int[][]> Z = new ArrayList<>();
+    ArrayList<int[][]> I = new ArrayList<>();
+    ArrayList<int[][]> O = new ArrayList<>();
     int[][] temporaryRect;
 
     //游戏面板
@@ -187,13 +187,13 @@ public class A extends JFrame implements KeyListener {
 
     //数据初始化
     public void initialize() throws FileNotFoundException {
-        ll();
-        rl();
-        t();
-        z1();
-        z2();
-        bar();
-        squ();
+        J();
+        L();
+        T();
+        S();
+        Z();
+        I();
+        O();
         completeLine = new int[table.length];
         score = 0;//分数
         //成就数据
@@ -418,15 +418,15 @@ public class A extends JFrame implements KeyListener {
         //获取对应方块
         if (rectType < 12){
             typeNumber = (typeNumber + 1) % 4;
-            if(rectType < 4) temporaryRect = ll.get(typeNumber);
-            else if(rectType < 8) temporaryRect = rl.get(typeNumber);
-            else temporaryRect = t.get(typeNumber);
+            if(rectType < 4) temporaryRect = J.get(typeNumber);
+            else if(rectType < 8) temporaryRect = L.get(typeNumber);
+            else temporaryRect = T.get(typeNumber);
         } else if (rectType < 18){
             typeNumber = (typeNumber + 1) % 2;
-            if(rectType < 14) temporaryRect = z1.get(typeNumber);
-            else if(rectType < 16) temporaryRect = z2.get(typeNumber);
-            else temporaryRect = bar.get(typeNumber);
-        } else temporaryRect = squ.get(0);
+            if(rectType < 14) temporaryRect = S.get(typeNumber);
+            else if(rectType < 16) temporaryRect = Z.get(typeNumber);
+            else temporaryRect = I.get(typeNumber);
+        } else temporaryRect = O.get(0);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if(temporaryRect[i][j] != 0){
@@ -515,14 +515,12 @@ public class A extends JFrame implements KeyListener {
         }
 
     }
+
     public boolean canGoLeft() {
         for (int i = 0; i < table.length - 1; i++) {//从左到右扫描，一旦有撞墙或撞方块，canGoLeft → false
-            for (int j = 1; j < table[0].length - 1; j++) {
+            for (int j = 0; j < table[0].length - 1; j++) {
                 if (table[i][j] == color){
-                    if (table[i][j] == color && j == 1) {
-                        return false;//撞墙
-                    }
-                    if (table[i][j] == color && j > 1 && table[i][j - 1] != 0) {
+                    if (table[i][j] == color && j >= 1 && table[i][j - 1] != 0) {
                         return false;//撞方块
                     }
                     break;
@@ -548,11 +546,8 @@ public class A extends JFrame implements KeyListener {
         for (int i = table.length - 2; i >= 0; i--) {
             for (int j = table[0].length - 2; j > 0; j--) {
                 if(table[i][j] == color) {
-                    if (table[i][j] == color && j == table[0].length - 2) {
-                        return false;//撞墙
-                    }
-                    if (table[i][j] == color && j < table[0].length - 2 && table[i][j + 1] != 0) {
-                        return false;//撞方块
+                    if (table[i][j] == color && j < table[0].length - 1 && table[i][j + 1] != 0) {
+                        return false;//撞墙或者方块
                     }
                     break;
                 }
@@ -587,169 +582,169 @@ public class A extends JFrame implements KeyListener {
         rectType = rand.nextInt(19);
         if (rectType < 4) {
             typeNumber = rand.nextInt(4);
-            shape = ll.get(typeNumber);
+            shape = J.get(typeNumber);
         } else if (rectType < 8) {
             typeNumber = rand.nextInt(4);
-            shape = rl.get(typeNumber);
+            shape = L.get(typeNumber);
         } else if (rectType < 12) {
             typeNumber = rand.nextInt(4);
-            shape = t.get(typeNumber);
+            shape = T.get(typeNumber);
         } else if (rectType < 14) {
             typeNumber = rand.nextInt(2);
-            shape = z1.get(typeNumber);
+            shape = S.get(typeNumber);
         } else if (rectType < 16) {
             typeNumber = rand.nextInt(2);
-            shape = z2.get(typeNumber);
+            shape = Z.get(typeNumber);
         } else if (rectType < 18) {
             typeNumber = rand.nextInt(2);
-            shape = bar.get(typeNumber);
+            shape = I.get(typeNumber);
         } else {
-            shape = squ.get(0);
+            shape = O.get(0);
         }
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (shape[i][j] == 1) {
                     table[i][j + 4] = color;//将初始色改为color编号；
-                }                      //以上完成方块种类以及颜色的随机生成
+                }
             }
         }
         Repaint();
     }
-    public void ll() {
+    public void J() {
         int[][] ll1 = new int[4][4];
         ll1[1][1] = 1;
         ll1[2][1] = 1;
         ll1[3][1] = 1;
         ll1[3][0] = 1;
-        ll.add(ll1);
+        J.add(ll1);
 
         int[][] ll2 = new int[4][4];
         ll2[1][0] = 1;
         ll2[2][0] = 1;
         ll2[2][1] = 1;
         ll2[2][2] = 1;
-        ll.add(ll2);
+        J.add(ll2);
 
         int[][] ll3 = new int[4][4];
         ll3[1][2] = 1;
         ll3[1][1] = 1;
         ll3[2][1] = 1;
         ll3[3][1] = 1;
-        ll.add(ll3);
+        J.add(ll3);
 
         int[][] ll4 = new int[4][4];
         ll4[2][0] = 1;
         ll4[2][1] = 1;
         ll4[2][2] = 1;
         ll4[3][2] = 1;
-        ll.add(ll4);
+        J.add(ll4);
 
     }
-    public void rl() {
+    public void L() {
         int[][] l1 = new int[4][4];
         l1[1][1] = 1;
         l1[2][1] = 1;
         l1[3][1] = 1;
         l1[3][2] = 1;
-        rl.add(l1);
+        L.add(l1);
 
         int[][] l2 = new int[4][4];
         l2[3][0] = 1;
         l2[2][0] = 1;
         l2[2][1] = 1;
         l2[2][2] = 1;
-        rl.add(l2);
+        L.add(l2);
 
         int[][] l3 = new int[4][4];
         l3[1][0] = 1;
         l3[1][1] = 1;
         l3[2][1] = 1;
         l3[3][1] = 1;
-        rl.add(l3);
+        L.add(l3);
 
         int[][] l4 = new int[4][4];
         l4[2][0] = 1;
         l4[2][1] = 1;
         l4[2][2] = 1;
         l4[1][2] = 1;
-        rl.add(l4);
+        L.add(l4);
 
     }
-    public void t() {
+    public void T() {
         int[][] t1 = new int[4][4];
         t1[1][1] = 1;
         t1[2][0] = 1;
         t1[2][1] = 1;
         t1[2][2] = 1;
-        t.add(t1);
+        T.add(t1);
         int[][] t2 = new int[4][4];
         t2[1][1] = 1;
         t2[2][1] = 1;
         t2[3][1] = 1;
         t2[2][2] = 1;
-        t.add(t2);
+        T.add(t2);
         int[][] t3 = new int[4][4];
         t3[2][0] = 1;
         t3[2][1] = 1;
         t3[2][2] = 1;
         t3[3][1] = 1;
-        t.add(t3);
+        T.add(t3);
         int[][] t4 = new int[4][4];
         t4[1][1] = 1;
         t4[2][1] = 1;
         t4[3][1] = 1;
         t4[2][0] = 1;
-        t.add(t4);
+        T.add(t4);
     }
-    public void z1() {
+    public void S() {
         int[][] z11 = new int[4][4];
         z11[1][0] = 1;
         z11[2][0] = 1;
         z11[2][1] = 1;
         z11[3][1] = 1;
-        z1.add(z11);
+        S.add(z11);
         int[][] z12 = new int[4][4];
         z12[1][1] = 1;
         z12[1][2] = 1;
         z12[2][0] = 1;
         z12[2][1] = 1;
-        z1.add(z12);
+        S.add(z12);
     }
-    public void z2() {
+    public void Z() {
         int[][] z21 = new int[4][4];
         z21[1][2] = 1;
         z21[2][2] = 1;
         z21[2][1] = 1;
         z21[3][1] = 1;
-        z2.add(z21);
+        Z.add(z21);
         int[][] z22 = new int[4][4];
         z22[1][0] = 1;
         z22[1][1] = 1;
         z22[2][1] = 1;
         z22[2][2] = 1;
-        z2.add(z22);
+        Z.add(z22);
     }
-    public void bar() {
+    public void I() {
         int[][] i1 = new int[4][4];
         i1[0][1] = 1;
         i1[1][1] = 1;
         i1[2][1] = 1;
         i1[3][1] = 1;
-        bar.add(i1);
+        I.add(i1);
         int[][] i2 = new int[4][4];
         i2[2][0] = 1;
         i2[2][1] = 1;
         i2[2][2] = 1;
         i2[2][3] = 1;
-        bar.add(i2);
+        I.add(i2);
     }
-    public void squ() {
+    public void O() {
         int[][] squ1 = new int[4][4];
         squ1[1][1] = 1;
         squ1[1][2] = 1;
         squ1[2][1] = 1;
         squ1[2][2] = 1;
-        squ.add(squ1);
+        O.add(squ1);
     }
 
 
