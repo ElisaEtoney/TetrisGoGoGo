@@ -14,6 +14,7 @@ import static javax.swing.SwingConstants.CENTER;
 
 public class A extends JFrame implements KeyListener {
     //TODO:MUSIC!!!!
+    //TODO:读档
     private static final int game_x = 21;
     private static final int game_y = 12;
     JTextArea[][] text;
@@ -28,13 +29,13 @@ public class A extends JFrame implements KeyListener {
     JButton bu6,bu7,bu8;
     JButton but1,but2,but3;
     JButton[] achiBut;
-
     JLabel lab3;
     JButton but4,but5;
 
     int score = 0;
     //在游戏选档的时候用
     int time;
+    int loadNum = 0;
 
     int[] completeLine;
     int lineCounter;
@@ -65,6 +66,7 @@ public class A extends JFrame implements KeyListener {
     ArrayList<int[][]> squ = new ArrayList<>();
     int[][] temporaryRect;
 
+
     JPanel gameMain = new JPanel();
     JPanel explain_le = new JPanel();
     BeautifulPanel gameset = new BeautifulPanel();
@@ -72,11 +74,23 @@ public class A extends JFrame implements KeyListener {
 
     public void achievement(){
         JFrame achi = new JFrame("ACHIEVEMENT");
+        achiBut = new JButton[7];
+        for (int i = 0; i < 7; i++) {
+            achiBut[i] = new JButton(achievementContent[i]);
+            achiBut[i].setFont(font2);
+            achiBut[i].setEnabled(false);
+        }
+        for (int i = 0; i < 7; i++) {
+            if (achievement.get(i) != 0){
+                achiBut[i].setEnabled(true);
+            }
+        }
+
         achi.setSize(350,500);
         achi.setLocationRelativeTo(null);
         achi.setLayout(new GridLayout(7,1,3,3));
         for (int i = 0; i < 7; i++) {
-            achi.add(new JButton(achievementContent[i]));
+            achi.add(achiBut[i]);
         }
 
         achi.setVisible(true);
@@ -195,23 +209,6 @@ public class A extends JFrame implements KeyListener {
         bu2 = new JButton("LOAD"); bu2.setBounds(100,350,400,80); bu2.setFont(font2); bu2.setForeground(new Color(177,114,226));
         bu3 = new JButton("ACHIEVEMENT"); bu3.setBounds(100,450,400,80); bu3.setFont(font2); bu3.setForeground(new Color(177,114,226));
         bu4 = new JButton("EXIT"); bu4.setBounds(100,550,400,80); bu4.setFont(font2); bu4.setForeground(new Color(177,114,226));
-
-        bu2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
-        bu3.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
-        bu4.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
 
         gameset.add(title);
         gameset.add(bu6);
@@ -373,7 +370,22 @@ public class A extends JFrame implements KeyListener {
         }
         output2.close();
     }
-
+    public void load() throws IOException {
+        loadNum = 1;
+        File file1 = new File("Data.txt");
+        ArrayList<Integer> miniRect = new ArrayList<>();
+        Scanner sc = new Scanner(file1);
+        while (sc.hasNext()){
+            miniRect.add(sc.nextInt());
+        }
+        for(int i = 0; i < table.length; i++ ){
+            for( int j = 0; j < table[i].length; j++){
+                table[i][j] = miniRect.get((i)* table.length + j);
+            }
+        }
+        sc.close();
+        Repaint();
+    }
 
     public A() {
         text = new JTextArea[game_x][game_y];
@@ -390,9 +402,61 @@ public class A extends JFrame implements KeyListener {
         tetris1.gameRun();
     }
 
-    //gameRun包含成就6
+
     public void gameRun() throws InterruptedException, IOException {
+        File ac = new File("achievement.txt");
+        Scanner acRead = new Scanner(ac);
+        while (acRead.hasNext()){
+            achievement.add(acRead.nextInt());
+        }
+        acRead.close();
         flag = true;
+        //读档按键
+        bu2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //读取难度
+                File difLoad = new File("DIFFFICULTY.txt");
+                Scanner difRead = null;
+                try {
+                    difRead = new Scanner(difLoad);
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+                while (difRead.hasNext()){
+                    time =difRead.nextInt();
+                }
+                difRead.close();
+                //读取存档
+//                try {
+//                    load();
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
+            File DataLoad = new File("Data.txt");
+                Scanner DataRead = null;
+                try {
+                    DataRead = new Scanner(DataLoad);
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+                while (DataRead.hasNext()){
+                    for (int i = 0; i < game_x; i++) {
+                        for (int j = 0; j < game_y; j++) {
+                            table[i][j] = DataRead.nextInt();
+                        }
+                    }
+                }
+                DataRead.close();
+                gameState = 0;
+                loadNum = 1;
+                flag = false;
+                gameset.setVisible(false);
+                initGamePanel();
+                initExplainPanel();
+            }
+        });
+        //难度选择 三个
         bu6.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -527,18 +591,13 @@ public class A extends JFrame implements KeyListener {
         rectType = 0;
         typeNumber = 0;
         theSameRecType_Achievement = 0;
-        for (int i = 0; i < table.length - 1; i++) {
-            for (int j = 1; j < table[i].length - 1; j++) {
-                table[i][j] = 0;
+        if (loadNum == 0) {
+            for (int i = 0; i < table.length - 1; i++) {
+                for (int j = 1; j < table[i].length - 1; j++) {
+                    table[i][j] = 0;
+                }
             }
         }
-        //读取成就
-        File ac = new File("achievement.txt");
-        Scanner acRead = new Scanner(ac);
-        while (acRead.hasNext()){
-            achievement.add(acRead.nextInt());
-        }
-        acRead.close();
         //读取分数记录
         File sco = new File("scoreRank.txt");
         Scanner scoreRead = new Scanner(sco);
@@ -554,9 +613,9 @@ public class A extends JFrame implements KeyListener {
         if(achievement.get(idNumber) == 0){
             achievement.set(idNumber,1);
             //且对应成就提醒
-            System.out.printf(achievementContent[idNumber]);
+            achiHint(idNumber);
+//            System.out.printf(achievementContent[idNumber]);
         }
-
     }
     public void recordAchievement() throws FileNotFoundException {
         java.io.File ac = new java.io.File("achievement.txt");
@@ -631,7 +690,7 @@ public class A extends JFrame implements KeyListener {
         for (int i = 0; i < table.length-1; i++) {
             if(completeLine[i] == 1){
                 for (int j = 1; j < table[0].length-1; j++) {
-                    table[i][j] = 0;
+                        table[i][j] = 0;
                 }
             }
         }
@@ -639,10 +698,7 @@ public class A extends JFrame implements KeyListener {
         Thread.sleep(300);
     }
     public void moveDown() throws InterruptedException {
-//        lineCounter = 0;
-//        for (int i : completeLine) lineCounter += i;
-
-        while (lineCounter > 0) {//移动，一次一行
+        while (lineCounter > 0) {
             int k;
             for (k = 19; k > 3; k--) {//前四行不进行判断
                 if (completeLine[k] == 1) {
@@ -659,11 +715,6 @@ public class A extends JFrame implements KeyListener {
                     completeLine[i] = completeLine[i - 1];
                 }
             }
-//            for (int j = 1; j < table[0].length - 1; j++) {
-//                //清除首行，保证没有方块余留
-//                table[0][j] = 0;
-//                completeLine[0] = 0;
-//            }
             lineCounter--;
         }
         Repaint();
@@ -749,7 +800,7 @@ public class A extends JFrame implements KeyListener {
                 if(temporaryRect[i][j] != 0){
                     //判断目标方块的有色区域 如果进入table是否越界
                     if( !(m-3+i >= 0 && m-3+i < table.length-1 && n+j >=1 && n + j < table[0].length-1)) return false;
-                        //如果没有越界，判断 目标方块的有色区域 是否和table已经堆叠的方块重叠
+                    //如果没有越界，判断 目标方块的有色区域 是否和table已经堆叠的方块重叠
                     else if (table[m-3+i][j+n] != 0 && table[m-3+i][j+n] != color) return false;
                 }
             }
