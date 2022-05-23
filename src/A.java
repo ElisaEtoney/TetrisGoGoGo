@@ -132,6 +132,7 @@ public class A extends JFrame implements KeyListener {
 
     //gameRun包含成就6
     public void gameRun() throws InterruptedException, IOException {
+        gameField.setText("Good boy go~");
         time = 500;
         initialize();
         System.out.println("Tetris Go!");
@@ -174,7 +175,9 @@ public class A extends JFrame implements KeyListener {
             //方块产生并运动 触底即退出运动循环
             getRandomRect();
         }
-        label1 = new JLabel("Good boy go~");
+        RePaintForGameOver();
+        gameField.setText("Game over boy~");
+        //label1 = new JLabel("Good boy go~");
         if (rectNumber <= 6 && achievement.get(5) == 0) {
             achievementsJudge(5);
             //成就提醒
@@ -245,17 +248,18 @@ public class A extends JFrame implements KeyListener {
 
 
     //成就用到的方法
-    public void achievementsJudge(int idNumber)throws IOException {
+    public void achievementsJudge(int idNumber) {
         if(achievement.get(idNumber) == 0){
             achievement.set(idNumber,1);
             //且对应成就提醒
+            System.out.printf(achievementContent[idNumber]);
         }
 
     }
     public void recordAchievement() throws FileNotFoundException {
-        java.io.File file2 = new java.io.File("achievementNumber.txt");
+        java.io.File file2 = new java.io.File("achievement.txt");
         PrintWriter output = new PrintWriter(file2);
-        for(double i : achievement) output.print(i + " ");
+        for(int i : achievement) output.print(i + " ");
         output.close();
     }
 
@@ -385,6 +389,16 @@ public class A extends JFrame implements KeyListener {
                 else if(table[i][j] == 4 || table[i][j] == 8) text[i][j].setBackground(new Color(107,155,210));
                 else if(table[i][j] == 5 || table[i][j] == 9) text[i][j].setBackground(new Color(248,210,227));
                 else if(table[i][j] == 0) text[i][j].setBackground(Color.WHITE);
+            }
+        }
+    }
+    public void RePaintForGameOver() throws InterruptedException {
+        for (int i = 0; i < table.length; i++) {
+            for (int j = 0; j < table[i].length; j++) {
+                if(table[i][j] != 0) {
+                    text[i][j].setBackground(new Color(178 - 6 * i,178 - 6 * i,178 - 6 * i));
+                }
+                Thread.sleep(3);
             }
         }
     }
